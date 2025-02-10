@@ -1,8 +1,8 @@
-# Flask Website 
+# Flask Website
 
 > A professional Flask-based web project following Lanqiao's tutorial, implementing user authentication, database migrations, and more.
 
-![Flask](https://img.shields.io/badge/Flask-2.0.3-blue) ![Python](https://img.shields.io/badge/Python-3.11-yellow) ![License](https://img.shields.io/badge/License-MIT-green)
+![Flask](https://img.shields.io/badge/Flask-2.0.3-blue) ![Python](https://img.shields.io/badge/Python-3.11-yellow) ![Licence](https://img.shields.io/badge/Licence-MIT-green)
 
 ## Introduction
 This project is a **Flask-based web application**. It aims to implement a fully functional website with user authentication, a blog system, and a clean UI using Flask-Bootstrap.
@@ -48,7 +48,7 @@ export FLASK_ENV=development
 export FLASK_DEBUG=1
 ```
 
-### 2. Initialize the Database
+### 2. Initialise the Database
 ```sh
 flask db init
 flask db migrate -m "Initial migration"
@@ -82,9 +82,10 @@ flask-website/
 
 ---
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Licence
+This project is licensed under the MIT Licence - see the [LICENCE](LICENCE) file for details.
 
 ---
 
 > *Built with Flask and Love by [fredsun02](https://github.com/fredsun02)*
+
