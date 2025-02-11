@@ -91,7 +91,7 @@ def before_request():
 @front.route('/unconfirmed_user')
 @login_required
 def unconfirmed_user():
-    if current_user.is_anomymous or current_user.confirmed:
+    if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('.index'))
     return render_template('user/confirm.html')
 
