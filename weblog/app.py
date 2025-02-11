@@ -3,10 +3,13 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_mail import Mail
 
 from .handlers import blueprint_list
 from .configs import configs
 from .models import db, Role, User
+
+mail = Mail()
 
 def register_blueprints(app):
     for bp in blueprint_list:
@@ -18,6 +21,9 @@ def register_extensions(app):
     db.init_app(app)
     Moment(app)  # 现在 Moment 也注册到 Flask 了
     Migrate(app, db)
+    mail.init_app(app)  # 初始化 Flask-Mail
+
+    # 配置 Flask-Login
     login_manager = LoginManager()
     login_manager.init_app(app)
 

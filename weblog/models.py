@@ -2,6 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from flask import current_app
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import BadSignature
+
 
 db = SQLAlchemy()
 
@@ -24,6 +27,10 @@ class User(db.Model, UserMixin):
     
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))  # 外键，关联角色表
     role = db.relationship('Role', backref=db.backref('users', lazy='dynamic'))  # 定义用户和角色的关系
+
+    confirmed = db.Column(db.Boolean, default=False) # 用于验证user是否已经通过邮箱验证，缺省值为 False
+
+
 
     @property
     def password(self):
@@ -63,3 +70,48 @@ class User(db.Model, UserMixin):
             print(user)  # 输出：<User: Alice>
         """
         return '<User: {}>'.format(self.name)
+    
+    # 当前用户类的实例的 serializer 属性值即为令牌生成器
+    @property
+    def serializer(self, expires_in=3600):
+        """
+        创建用于生成和解析 Token 的 Serializer（令牌生成器）。
+
+        - `SECRET_KEY` 作为加密密钥，确保 Token 只能由相同密钥解密。
+        - `expires_in` 指定 Token 过期时间（默认 3600 秒 = 1 小时）。
+        - `dumps(data)` 生成 Token，`loads(token)` 解析 Token。
+        - **如果 `SECRET_KEY` 变了，所有之前生成的 Token 都无法解析！**
+        """
+        return Serializer(current_app.config['SECRET_KEY'], expires_in)
+
+    def generate_confirm_user_token(self):
+        """
+        生成邮箱验证 Token，包含当前用户 ID。
+
+        - `self.serializer.dumps({'confirm_user': self.id})` 生成 Token。
+        - 生成的 Token **只能用相同 `SECRET_KEY` 解密**，否则解析失败。
+        - 这个 Token 可用于邮箱验证、账号激活等功能。
+        """
+        return self.serializer.dumps({'confirm_user': self.id})
+
+    def confirm_user(self, token):
+        """
+        验证 Token 是否有效，并确认用户身份。
+
+        - `loads(token)` 解析 Token，检查数据是否匹配当前用户 ID。
+        - **如果 `SECRET_KEY` 变了，Token 解析会失败（BadSignature 异常）。**
+        - **如果 Token 过期或被篡改，解析也会失败。**
+        - 解析成功后，设置 `self.confirmed = True` 并更新数据库。
+        """
+        try:
+            data = self.serializer.loads(token)  # 解析 Token
+        except BadSignature:  # Token 可能被篡改或密钥不匹配
+            return False
+
+        if data.get('confirm_user') != self.id:  # 确保 Token 归属当前用户
+            return False
+
+        self.confirmed = True  # 认证成功，标记用户为已验证
+        db.session.add(self)
+        db.session.commit()
+        return True
