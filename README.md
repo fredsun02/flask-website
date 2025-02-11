@@ -88,4 +88,3 @@ This project is licensed under the MIT Licence - see the [LICENCE](LICENCE) file
 ---
 
 > *Built with Flask and Love by [fredsun02](https://github.com/fredsun02)*
-
