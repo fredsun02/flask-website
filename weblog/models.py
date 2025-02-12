@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from flask import current_app
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import TimedSerializer as Serializer  # 使用 TimedSerializer
 from itsdangerous import BadSignature
 
 
@@ -12,6 +12,27 @@ db = SQLAlchemy()
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
+    default = db.Column(db.Boolean, default=False, index=True)
+    permissions = db.Column(db.Integer)
+
+    @staticmethod
+    def insert_roles():
+        # 保留所有角色初始化的代码
+        roles = {
+            'User': Permission.FOLLOW | Permission.COMMENT | Permission.WRITE,
+            'Moderator': Permission.FOLLOW | Permission.COMMENT | Permission.WRITE | Permission.MODERATE,
+            'Administrator': Permission.FOLLOW | Permission.COMMENT | Permission.WRITE | Permission.MODERATE | Permission.ADMINISTER
+        }
+        default_role = 'User'
+        for r, v in roles.items():
+            role = Role.query.filter_by(name=r).first()
+            if role is None:
+                role = Role(name=r)
+            role.permissions = v
+            role.default = True if role.name == default_role else False
+            db.session.add(role)
+        db.session.commit()
+        print('已初始化角色')
 
     def __repr__(self):
         return '<Role: {}>'.format(self.name)
@@ -31,6 +52,12 @@ class User(db.Model, UserMixin):
     confirmed = db.Column(db.Boolean, default=False) # 用于验证user是否已经通过邮箱验证，缺省值为 False
 
 
+    def __init__(self, **kw):
+        '''初始化实例，给用户增加默认角色'''
+        # 调用父类的初始化方法
+        super().__init__(**kw)
+        # 然后给实例的 role 属性赋值
+        self.role = Role.query.filter_by(default=True).first()
 
     @property
     def password(self):
@@ -73,16 +100,15 @@ class User(db.Model, UserMixin):
     
     # 当前用户类的实例的 serializer 属性值即为令牌生成器
     @property
-    def serializer(self, expires_in=3600):
+    def serializer(self):
         """
         创建用于生成和解析 Token 的 Serializer（令牌生成器）。
 
         - `SECRET_KEY` 作为加密密钥，确保 Token 只能由相同密钥解密。
-        - `expires_in` 指定 Token 过期时间（默认 3600 秒 = 1 小时）。
         - `dumps(data)` 生成 Token，`loads(token)` 解析 Token。
         - **如果 `SECRET_KEY` 变了，所有之前生成的 Token 都无法解析！**
         """
-        return Serializer(current_app.config['SECRET_KEY'], expires_in)
+        return Serializer(secret_key=current_app.config['SECRET_KEY'])
 
     def generate_confirm_user_token(self):
         """
@@ -115,3 +141,47 @@ class User(db.Model, UserMixin):
         db.session.add(self)
         db.session.commit()
         return True
+
+    @property
+    def is_administrator(self):
+        '''判断用户是否是管理员'''
+        result = self.role.permissions & Permission.ADMINISTER
+        if result:
+            print(f"用户 {self.name} 有管理员权限 (权限值: {result})")
+        else:
+            print(f"用户 {self.name} 没有管理员权限 (权限值: {result})")
+        return result
+    
+    @property
+    def is_moderator(self):
+        '''判断用户是否是协管员'''
+        result = self.role.permissions & Permission.MODERATE
+        print(f"用户 {self.name}:")
+        print(f"- 当前角色: {self.role.name}")
+        print(f"- 协管员权限: {'是' if result else '否'} (权限值: {result})")
+        return result
+    
+    def has_permission(self, permission):
+        '''判断用户是否有指定权限'''
+        result = self.role.permissions & permission
+        permission_name = {
+            Permission.FOLLOW: "关注",
+            Permission.COMMENT: "评论",
+            Permission.WRITE: "写作",
+            Permission.MODERATE: "管理",
+            Permission.ADMINISTER: "超级管理"
+        }.get(permission, "未知权限")
+        
+        print(f"用户 {self.name}:")
+        print(f"- 当前角色: {self.role.name}")
+        print(f"- 检查权限: {permission_name}")
+        print(f"- 是否拥有: {'是' if result else '否'} (权限值: {result})")
+        return result
+
+class Permission:
+    '''权限类'''
+    FOLLOW = 1 # 关注
+    WRITE = 2 # 写文章
+    COMMENT = 4 # 评论
+    MODERATE = 8 # 管理评论
+    ADMINISTER = 128 # 管理用户
