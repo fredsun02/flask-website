@@ -1,0 +1,29 @@
+{% extends 'base.html' %} 
+{% block title %} Weblog {% endblock %} 
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Hello World!</h1>
+    <br />
+    <p>当前时间：{{ moment(date_time).format('LLL') }}</p>
+    <p>上次刷新页面时间据现在：{{ moment(date_time).fromNow(refresh=True) }}</p>
+</div>
+<div>
+    <body>
+        <h1>欢迎来到我的网页</h1>
+        <p id="message">这是一个简单的 HTML 示例页面。</p>
+        <button onclick="changeMessage()">点击这里</button>
+        <a href="https://www.example.com">点击这里访问示例网站</a>
+
+        <script>
+            let message = ["你点击了按钮！", "欢迎来到互动页面！", "希望你有美好的一天！", "点击可以切换消息！"];
+            let index = 0;
+
+            function changeMessage() {
+                index = (index + 1) % message.length;
+                document.getElementById("message").innerText = message[index];
+            }
+        </script>
+    </body>
+</div>
+{% endblock %}
