@@ -54,15 +54,15 @@
                     ></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="{#{ url_for('user.index', name=current_user.name) }#}">
-                                个人主页</a
-                                >
+                          <a href="{{ url_for('user.index', name=current_user.name) }}">
+                              个人主页</a
+                              >
                         </li>
                         <li role="separator" class="divider"></li>
                         <li>
-                            <a href="{#{ url_for('user.change_password') }#}">
-                                修改密码</a
-                                >
+                            <a href="{#{ url_for('user.change_password') }#}"> <!-- 这里有个注释：.change_password() 尚未实装-->
+                              修改密码</a
+                              >
                         </li>
                         <li role="separator" class="divider"></li>
                         <li><a href="/logout">退出登录</a></li>

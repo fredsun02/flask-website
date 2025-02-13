@@ -155,3 +155,38 @@
 #### 总结
 今天主要完成了用户权限系统的优化工作，通过添加详细的权限检查输出信息，使系统的权限管理更加直观和易于调试。虽然遇到了一些拼写错误和版本兼容性的问题，但都得到了及时解决。后续还需要继续完善权限管理的用户界面，提升整体用户体验。
 >>>>>>> 8154a16 (Updated 12.02.25)
+
+
+### 开发日志 - 13.02.25
+
+#### 今日开发内容
+今天的开发任务是实现用户个人主页的渲染，包括用户和管理员编辑信息的功能，以及相应的视图函数、表单类和前端模板。
+
+#### 实现功能
+1. **完善 User 映射类**
+   - 添加了 `age`, `gender`, `phone_number`, `location`, `about_me` 属性
+   - 其中 `gender` 是枚举类型的数据，定义了一个特别的 Gender 类，继承自 enum.Enum 类
+2. **展示用户最近活动时间**
+   - 在主页模板中添加了用户最近活动时间的展示
+   - 定义了一个新方法 ping()，每次登录时 @front.before_app_request 装饰器会调用它
+   - 该方法会更新用户的 last_seen 属性 ```self.last_seen = datetime.utcnow()```
+3. **创建了 User 蓝图**
+   - 实现了用户主页的展示功能，用户可以通过 `/user/<name>/index` 路由访问自己的主页。
+   - 提供了用户编辑个人信息的功能，用户可以通过 `/user/edit-profile` 路由修改自己的信息。
+   - 实现了管理员编辑用户信息的功能，管理员可以通过 `/user/admin-profile/<int:id>` 路由修改任意用户的信息。
+   - 使用了权限控制，确保只有登录用户才能访问编辑功能，并且只有管理员才能访问管理员编辑功能。
+4. **创建了 ProfileForm 和 AdminProfileForm 表单类**
+   - 继承自 Flask-WTF 的 Form 类
+   - 定义了用户和管理员编辑信息的表单
+   - 表单类中定义了性别选择框，使用 Flask-Bootstrap 的 Form.RadioItem 类来生成单选按钮
+   - 定义了新方法 validate_name() 和 validate_phone_number() 来验证用户名和手机号是否已存在
+5. **创建了 decorators.py 文件**
+   - 定义了 admin_required 装饰器，用于检查用户是否具有管理员权限
+   - 定义了 permission_required 装饰器，用于检查用户是否具有特定权限
+
+#### 遇到的 Bug & 解决方案
+| **问题** | **原因** | **解决方案** |
+|----------|---------|-------------|
+| `AttributeError: 'User' object has no attribute 'role'` | 缺少 role 属性 | 修改权限检查逻辑为 ```self.role.permissions & permission``` 而非 ```self.role(permission) == permission``` |
+|蓝图注册错误 | 蓝图注册错误 | 蓝图注册地点应该为 ```handlers/__init__.py``` 文件中 |
+| 表单验证错误 | 表单验证错误 | 修改表单前 user 的 confirmed 属性应为 True|

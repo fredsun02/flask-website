@@ -7,6 +7,9 @@
     <br />
     <p>当前时间：{{ moment(date_time).format('LLL') }}</p>
     <p>上次刷新页面时间据现在：{{ moment(date_time).fromNow(refresh=True) }}</p>
+    {% if current_user.is_active %}
+    <p>最近活动时间： {{ moment(current_user.last_seen).format('LLL') }} </p>
+    {% endif %} 
 </div>
 <div>
     <body>

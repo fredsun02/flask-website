@@ -7,7 +7,7 @@ from ..forms import RegisterForm, LoginForm
 from ..models import db, User
 from ..email import send_email
 
-front = Blueprint('front', __name__)
+front = Blueprint('front', __name__) # front.py - 主页相关
 
 @front.route('/')
 def index():
@@ -82,6 +82,8 @@ def before_request():
     # current_user 默认为匿名用户，is_authenticated = False (default)
     # 用户登录后，current_user 为登录用户，is_autheticated = True
     if current_user.is_authenticated:        
+        # 执行此方法刷新【最后登录时间】
+        current_user.ping()
         # 未验证的用户登录后要发出 POST 请求的话，让用户先通过验证
         # 如果用户未通过邮箱确认身份，且为 POST 请求
         if not current_user.confirmed and request.method == 'POST':
@@ -118,4 +120,3 @@ def confirm_user(token):
     else:
         flash('验证失败，链接无效', 'danger')
     return redirect(url_for('.index'))
-

@@ -4,9 +4,17 @@ from flask_login import UserMixin
 from flask import current_app
 from itsdangerous import TimedSerializer as Serializer  # 使用 TimedSerializer
 from itsdangerous import BadSignature
-
+from datetime import datetime
+import enum
 
 db = SQLAlchemy()
+
+
+class Gender(enum.Enum):
+    '''性别类, Role 类 gender 属性要用到此类'''
+    MALE = '男'
+    FEMALE = '女'
+    OTHER = '其他'
 
 
 class Role(db.Model):
@@ -18,6 +26,8 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         # 保留所有角色初始化的代码
+        # 这个方法里的代码只有在调用时才执行
+        # 所以 Permission 类可以在后面定义
         roles = {
             'User': Permission.FOLLOW | Permission.COMMENT | Permission.WRITE,
             'Moderator': Permission.FOLLOW | Permission.COMMENT | Permission.WRITE | Permission.MODERATE,
@@ -45,9 +55,20 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(64), unique=True, index=True)  # 用户名，唯一，并建立索引
     email = db.Column(db.String(64), unique=True, index=True)  # 用户邮箱，唯一，并建立索引
     _password = db.Column('password', db.String(256))  # 存储哈希后的密码（数据库中列名为 'password'）
+    age = db.Column(db.Integer, unique=False, index=True)  # 用户年龄，并建立索引
+    gender = db.Column(db.Enum(Gender))     # 这行在类定义时就会执行，所以 Gender 类必须提前定义
+    phone_number = db.Column(db.String(11), unique=True, index=True)
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.Text)
     
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))  # 外键，关联角色表
     role = db.relationship('Role', backref=db.backref('users', lazy='dynamic'))  # 定义用户和角色的关系
+
+    avatar_hash = db.Column(db.String(32))  # 头像哈希值
+
+    create_at = db.Column(db.DateTime, default=datetime.now)  # 创建时间
+
+    last_seen = db.Column(db.DateTime, default=datetime.now)  # 最后登录时间
 
     confirmed = db.Column(db.Boolean, default=False) # 用于验证user是否已经通过邮箱验证，缺省值为 False
 
@@ -177,6 +198,13 @@ class User(db.Model, UserMixin):
         print(f"- 检查权限: {permission_name}")
         print(f"- 是否拥有: {'是' if result else '否'} (权限值: {result})")
         return result
+
+    def ping(self):
+        '''用户登录时，自动执行此方法刷新操作时间'''
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
 
 class Permission:
     '''权限类'''

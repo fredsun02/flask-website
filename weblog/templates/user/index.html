@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}User: {{ user.name }}{% endblock %}
+
+{% block page_content %}
+  <div class="page-header">
+    <!-- 显示用户名 -->
+    <h1>{{ user.name }}</h1>
+    
+    <!-- 用户头像（目前被注释） -->
+    <div>
+      <img class='img-rounded profile-thumbnail'
+          src="{#{ user.gravatar(size=256) }#}">
+    </div>
+    
+    <!-- 如果用户设置了位置，显示位置并链接到谷歌地图 -->
+    {% if user.location %}
+      <p>From <a href='https://www.google.com/maps/place/{{ user.location }}'>
+        {{ user.location }}</a></p>
+    {% endif %}
+    
+    <!-- 管理员可以看到编辑链接 -->
+    {% if current_user.is_administrator %}
+      <p><a href="{{ url_for('user.admin_edit_profile', id=user.id) }}">
+        管理员修改个人信息</a></p>
+    {% endif %}
+    
+    <!-- 显示用户简介 -->
+    {% if user.about_me %}
+      <p>{{ user.about_me }}</p>
+    {% endif %}
+    
+    <!-- 对于已登录用户，显示注册时间和最后访问时间 -->
+    {% if user.is_authenticated and current_user != user %}
+      <p>Member since {{ moment(user.created_at).format('L') }}.
+         最近一次上线时间：{{ moment(user.last_seen).fromNow() }}</p>
+    {% endif %}
+    
+    <!-- 用户可以编辑自己的信息 -->
+    {% if current_user == user %}
+      <p><a href="/user/edit-profile">修改个人信息</a></p>
+    {% endif %}
+  </div>
+{% endblock %}

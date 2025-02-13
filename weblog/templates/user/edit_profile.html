@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/wtf.html' import quick_form %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block page_content %}
+  <div class='page-header'>
+    <h2>编辑个人信息</h2>
+  </div>
+  <div class='col-md-4'>
+    <p>Form will submit to: {{ url_for('user.edit_profile') }}</p>
+    {{ quick_form(form, 
+                 method="POST",
+                 action=url_for('user.edit_profile'),
+                 button_map={'submit': 'primary'}) }}
+  </div>
+{% endblock %}
