@@ -71,7 +71,7 @@
 
 2. **完善用户体验**
    - 添加更换邮箱功能。
-   - 用户登录时，如果账户未验证，提供按钮“重新发送验证邮件”。
+   - 用户登录时，如果账户未验证，提供按钮"重新发送验证邮件"。
 
 #### 总结
 今天的开发任务主要围绕用户邮箱验证进行，成功实现了用户注册后发送验证邮件的功能，并且利用 `itsdangerous` 进行 `token` 令牌管理。尽管仍然面临 SMTP 认证失败的问题，但已确定了进一步排查方案。
@@ -180,5 +180,247 @@
 | **问题** | **原因** | **解决方案** |
 |----------|---------|-------------|
 | `AttributeError: 'User' object has no attribute 'role'` | 缺少 role 属性 | 修改权限检查逻辑为 ```self.role.permissions & permission``` 而非 ```self.role(permission) == permission``` |
-|蓝图注册错误 | 蓝图注册错误 | 蓝图注册地点应该为 ```handlers/__init__.py``` 文件中 |
+| 蓝图注册错误 | 蓝图注册错误 | 蓝图注册地点应该为 ```handlers/__init__.py``` 文件中 |
 | 表单验证错误 | 表单验证错误 | 修改表单前 user 的 confirmed 属性应为 True|
+
+### 开发日志 - 14.02.25
+
+#### 今日开发内容
+今天的主要任务是实现用户头像功能，包括添加 Gravatar 头像支持、注册流程集成和用户界面展示。
+
+#### 实现功能
+1. **添加 Gravatar 头像支持**
+   - 在 User 模型中添加 `avatar_hash` 字段，用于存储头像 URL
+   - 实现 `gravatar()` 方法，生成基于邮箱的默认头像
+   ```python
+   def gravatar(self, size=256, default='identicon', rating='g'):
+       url = 'https://www.gravatar.com/avatar'
+       hash = self.avatar_hash or hashlib.md5(self.email.encode()).hexdigest()
+       return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+           url=url, hash=hash, size=size, default=default, rating=rating)
+   ```
+   - 默认使用 identicon 风格，生成独特的几何图案作为头像
+   - 支持自定义头像大小、默认样式和评级
+
+2. **注册流程集成**
+   - 在用户注册时自动生成并保存头像 URL
+   ```python
+   def create_user(self):
+       user = User()
+       self.populate_obj(user)
+       user.avatar_hash = user.gravatar()  # 生成并保存头像URL
+       db.session.add(user)
+       db.session.commit()
+   ```
+
+3. **用户界面展示**
+   - 在用户主页添加头像显示
+   ```html
+   <div class="col-md-3">
+       <img class="img-rounded profile-thumbnail"
+            src="{% if user.avatar_hash %}
+                   {{ user.avatar_hash }}
+                 {% else %}
+                   {{ user.gravatar(size=256) }}
+                 {% endif %}" />
+   </div>
+   ```
+   - 支持头像回退机制：如果 `avatar_hash` 为空，则实时生成头像
+
+#### 技术细节
+- 使用 Gravatar 服务作为头像提供方
+- 通过 MD5 哈希用户邮箱来生成唯一的头像标识
+- 支持的参数：
+  - size: 头像大小（默认 256px）
+  - default: 默认头像样式（使用 identicon）
+  - rating: 内容分级（使用 G 级）
+
+#### 遇到的 Bug & 解决方案
+| **问题** | **原因** | **解决方案** |
+|----------|---------|-------------|
+| 数据库字段错误 | 模型类和数据库表字段名不一致 | 统一使用 `create_at` 作为字段名 |
+| 角色分配失败 | 数据库中没有初始化角色数据 | 需要先调用 `Role.insert_roles()` 初始化角色 |
+
+
+### 开发日志 II - 14.02.25
+
+#### 今日开发内容
+今天主要完成了用户账户管理的核心功能，包括密码修改、忘记密码时的重置功能，以及邮箱更换功能。重点是通过邮件验证来确保这些敏感操作的安全性。
+
+#### 实现功能
+1. **密码管理功能**
+   - 已登录用户修改密码（需验证旧密码）
+   - 忘记密码时通过邮箱重置
+   - 重置密码时的邮件验证机制
+
+2. **邮箱验证系统**
+   - 复用已有的令牌验证机制
+   - 统一的邮件发送流程
+   - HTML/纯文本双格式邮件模板
+
+#### 关键技术 & 原理
+1. **表单验证机制**
+   ```python
+   class ChangePasswordForm(FlaskForm):
+       old_password = PasswordField('旧密码', validators=[DataRequired()])
+       password = PasswordField('新密码', validators=[
+           DataRequired(), 
+           Length(3, 22), 
+           NotEqualTo('old_password', message='新密码不能与旧密码相同')
+       ])
+   ```
+
+2. **令牌验证复用**
+   - 复用 `generate_confirm_user_token()` 生成重置密码令牌
+   - 复用 `confirm_user()` 验证令牌有效性
+   - 统一的安全验证机制
+
+3. **视图函数的双重请求处理**
+   ```python
+   @user.route('/reset-password/<name>/<token>', methods=['GET', 'POST'])
+   def reset_password(name, token):
+       # 先验证用户身份和令牌
+       if user and user.confirm_user(token):
+           form = ResetPasswordForm()
+           # GET 请求：显示表单页面
+           if request.method == 'GET':
+               return render_template('template.html', form=form)
+           # POST 请求：处理表单提交
+           if form.validate_on_submit():
+               # 更新数据库
+               return redirect(url_for('success_page'))
+   ```
+
+#### 遇到的 Bug & 解决方案
+1. **重置密码链接无效**
+   - 问题：使用了错误的令牌验证方法名
+   - 解决：将 `confirm_user_token` 改为 `confirm_user`
+
+2. **邮件模板语法错误**
+   - 问题：URL 生成函数中多余的单引号
+   - 解决：修正模板中的语法错误
+
+#### 安全性考虑
+1. 所有密码相关操作都需要邮件验证
+2. 重置密码链接具有时效性
+3. 令牌包含用户ID，确保操作针对特定用户
+
+
+### 开发日志 III - 14.02.25
+
+#### 今日开发内容
+今天主要完成了博客系统的核心功能开发，包括博客的发布、展示、编辑功能，以及分页显示和 Markdown 支持。
+
+#### 实现功能
+1. **博客数据模型**
+   - 创建 Blog 表，包含博客内容、HTML 内容、时间戳等字段
+   - 实现与 User 表的一对多关联
+   ```
+   class Blog(db.Model):
+      '''博客映射类'''
+
+      id = db.Column(db.Integer, primary_key=True)
+      body = db.Column(db.Text)
+      body_html = db.Column(db.Text)
+      time_stamp = db.Column(db.DateTime, index=True, default=datetime.now)
+      author_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))  # 当用户被删除时，删除该用户发表的博客
+      # 建立与 User 模型的关系
+      author = db.relationship('User', 
+                              backref=db.backref('blogs', 
+                                             lazy='dynamic',
+                                             cascade='all, delete-orphan'))
+      # 建立与 User 模型的关系
+      # relationship() 提供了访问关联对象的方式，而不是直接使用外键
+      # backref 会在 User 模型中添加 blogs 属性，方便反向查询
+      # lazy='dynamic' 使得查询延迟执行，返回查询对象而不是结果列表
+      # cascade='all, delete-orphan' 设置级联行为：
+      #   - all: 所有操作都级联（包括 save-update, merge, refresh-expire, expunge, delete）
+      #   - delete-orphan: 当记录与父对象解除关联时，自动删除这条记录
+      author = db.relationship('User', 
+                              backref=db.backref('blogs', 
+                                             lazy='dynamic',
+                                             cascade='all, delete-orphan')) 
+   ```
+
+2. **博客发布功能**
+   - 实现博客发布表单
+   - 支持 Markdown 编辑和预览
+   - 自动转换 Markdown 为 HTML
+   ```
+   class BlogForm(FlaskForm):
+      '''博客表单类'''
+
+      # 这里使用 Flask-PageDown 提供的字段类，以支持 Markdown 编辑
+      # 前端再设置一下预览，就可以在输入框输入 Markdown 语句并显示在页面上
+      body = PageDownField('博客内容', validators=[DataRequired()])
+      submit = SubmitField('提交')
+   ```
+
+3. **博客展示系统**
+   - 创建博客列表模板
+   - 实现分页功能
+   - 支持时间本地化显示
+   ```
+   weblog/templates/_blogs.html
+   ```
+
+4. **博客编辑功能**
+   - 作者编辑权限控制
+   - 管理员编辑权限
+   - Markdown 实时预览
+   ```
+   @user.route('/edit-blog/<int:id>', methods=['GET', 'POST'])
+   @login_required
+   def edit_blog(id):
+      '''编辑博客'''
+      blog = Blog.query.get_or_404(id)
+      if current_user != blog.author and not current_user.is_administrator():
+         abort(403)
+      form = BlogForm(obj=blog)
+      if form.validate_on_submit():
+         form.populate_obj(blog)
+         db.session.add(blog)
+         db.session.commit()
+         flash('博客已更新', 'success')
+         return redirect(url_for('front.blog', id=blog.id))
+      return render_template('user/edit_blog.html', form=form)
+   ```
+
+#### 关键技术 & 原理
+1. **分页查询实现**
+   ```python
+   pagination = Blog.query.order_by(Blog.time_stamp.desc()).paginate(
+       page=page,
+       per_page=current_app.config['BLOGS_PER_PAGE'],
+       error_out=False
+   )
+   ```
+
+2. **Markdown 支持**
+   - 使用 Flask-PageDown 提供编辑器界面
+   - 使用 Markdown 库进行格式转换
+   - 使用 Bleach 清理 HTML，防止 XSS 攻击
+
+3. **权限控制**
+   ```python
+   if current_user != blog.author and not current_user.is_administrator():
+       abort(403)
+   ```
+
+#### 遇到的 Bug & 解决方案
+| **问题** | **原因** | **解决方案** |
+|----------|---------|-------------|
+| 编辑链接格式错误 | URL 生成模板中多余空格 | 修正模板语法，移除多余空格 |
+| 头像大小不一致 | CSS 样式未统一 | 统一设置头像大小为 32px |
+
+#### 待优化项目
+1. 添加博客评论功能
+2. 实现博客分类和标签
+3. 添加博客搜索功能
+4. 优化编辑器界面
+5. 实现图片上传功能
+
+#### 环境依赖
+- Flask-PageDown
+- Markdown
+- Bleach

@@ -1,32 +1,56 @@
-{% extends 'base.html' %} 
-{% block title %} Weblog {% endblock %} 
+{% extends 'base.html' %}
+{% from 'bootstrap/wtf.html' import quick_form %}
+{% from '_macros.html' import render_pagination %}
+
+{% block title %}Weblog{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>Hello World!</h1>
-    <br />
-    <p>当前时间：{{ moment(date_time).format('LLL') }}</p>
-    <p>上次刷新页面时间据现在：{{ moment(date_time).fromNow(refresh=True) }}</p>
-    {% if current_user.is_active %}
-    <p>最近活动时间： {{ moment(current_user.last_seen).format('LLL') }} </p>
-    {% endif %} 
-</div>
-<div>
-    <body>
-        <h1>欢迎来到我的网页</h1>
-        <p id="message">这是一个简单的 HTML 示例页面。</p>
-        <button onclick="changeMessage()">点击这里</button>
-        <a href="https://www.example.com">点击这里访问示例网站</a>
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <h1>
+            Hello 
+            {% if current_user.name %}
+                {{ current_user.name }}
+            {% else %}
+                Stranger
+            {% endif %}
+        </h1>
+        <br>
 
-        <script>
-            let message = ["你点击了按钮！", "欢迎来到互动页面！", "希望你有美好的一天！", "点击可以切换消息！"];
-            let index = 0;
+        <!-- 博客发布表单（仅登录用户可见） -->
+        {% if current_user.is_authenticated %}
+            <div>
+                {{ quick_form(form) }}
+            </div>
+            <br>
+        {% endif %}
+    </div>
 
-            function changeMessage() {
-                index = (index + 1) % message.length;
-                document.getElementById("message").innerText = message[index];
-            }
-        </script>
-    </body>
-</div>
+    <!-- 博客列表 -->
+    {% include '_blogs.html' %}
+
+    <!-- 分页导航 -->
+    {% if pagination %}
+        <div class="pagination-nav">
+            {{ render_pagination(pagination, 'front.index') }}
+        </div>
+    {% endif %}
 {% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <!-- 引入 moment.js -->
+    {{ moment.include_moment() }}
+    {{ moment.lang('zh-cn') }}
+    <!-- 引入 Markdown 预览支持 -->
+    {{ pagedown.include_pagedown() }}
+{% endblock %}
+
+<style>
+.profile-thumbnail {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+}
+</style>
+    

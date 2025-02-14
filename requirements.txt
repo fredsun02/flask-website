@@ -1,6 +1,6 @@
 alembic==1.14.1
 blinker==1.8.2
-Flask==3.0.3
+Flask==2.3.3
 Flask-Bootstrap==3.3.7.1
 Flask-Login==0.6.3
 Flask-Mail==0.10.0
@@ -11,8 +11,9 @@ Flask-WTF==1.2.2
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
-psycopg2==2.9.9
 SQLAlchemy==2.0.35
-WTForms==3.2.1
+WTForms==2.3.3
 email_validator==2.2.0
 requests==2.32.3
+Flask-PageDown==0.2.2
+Faker==36.1.1

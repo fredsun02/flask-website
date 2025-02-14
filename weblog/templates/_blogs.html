@@ -1,0 +1,60 @@
+<ul class="posts">
+    {% for blog in blogs %}
+    <li class="post" style="list-style-type:none;">
+        <!-- 博客作者头像 -->
+        <div class="post-thumbnail">
+            <a href="{{ url_for('user.index', name=blog.author.name) }}" target="_blank">
+                <img class="img-rounded profile-thumbnail" 
+                     src="{{ blog.author.gravatar(size=32) }}">
+            </a>
+        </div>
+
+        <div class="post-content">
+            <!-- 发布时间 -->
+            <div class="post-date">
+                {{ moment(blog.time_stamp, local=True).fromNow() }}
+            </div>
+
+            <!-- 作者信息 -->
+            <div class="post-author">
+                <a href="{{ url_for('user.index', name=blog.author.name) }}" target="_blank">
+                    {{ blog.author.name }}
+                </a>
+            </div>
+
+            <!-- 博客内容 -->
+            <div class="post-body">
+                {% if blog.body_html %}
+                    {{ blog.body_html | safe }}
+                {% else %}
+                    {{ blog.body }}
+                {% endif %}
+            </div>
+
+            <!-- 博客操作按钮 -->
+            <div class="post-footer">
+                <!-- 博客链接 -->
+                {% if not hidebloglink %}
+                    <a href="{{ url_for('front.blog', id=blog.id) }}" target="_blank">
+                        <span class="label label-primary">BlogLink</span>
+                    </a>
+                {% endif %}
+
+                <!-- 作者编辑按钮 -->
+                {% if current_user == blog.author %}
+                    <a href="{{ url_for('user.edit_blog', id=blog.id) }}"
+                       {% if not noblank %}target="_blank"{% endif %}>
+                        <span class="label label-success">Edit</span>
+                    </a>
+                <!-- 管理员编辑按钮 -->
+                {% elif current_user.is_administrator %}
+                    <a href="{{ url_for('user.edit_blog', id=blog.id) }}"
+                       {% if not noblank %}target="_blank"{% endif %}>
+                        <span class="label label-danger">AdminEdit</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

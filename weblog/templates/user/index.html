@@ -3,42 +3,78 @@
 {% block title %}User: {{ user.name }}{% endblock %}
 
 {% block page_content %}
-  <div class="page-header">
-    <!-- 显示用户名 -->
-    <h1>{{ user.name }}</h1>
-    
-    <!-- 用户头像（目前被注释） -->
-    <div>
-      <img class='img-rounded profile-thumbnail'
-          src="{#{ user.gravatar(size=256) }#}">
+<div class="page-header">
+    <div class="row">
+        <!-- 左侧：用户头像 -->
+        <div class="col-md-3">
+            <img class="img-rounded profile-thumbnail"
+                 src="{% if user.avatar_hash %}
+                        {{ user.avatar_hash }}
+                      {% else %}
+                        {{ user.gravatar(size=256) }}
+                      {% endif %}" />
+        </div>
+
+        <!-- 右侧：用户信息 -->
+        <div class="col-md-9">
+            <!-- 用户名和简介 -->
+            <h2>
+                {{ user.name }}
+                <br/>
+                <small>{{ user.about_me }}</small>
+            </h2>
+
+            <!-- 用户地址（如果存在） -->
+            {% if user.location %}
+            <h5>
+                <strong>From </strong>
+                <a href="https://www.google.com/maps/place/{{ user.location }}" 
+                   target="_blank">
+                    {{ user.location }}
+                </a>
+            </h5>
+            {% endif %}
+
+            <!-- 基本信息 -->
+            <h5><strong>Email : </strong>{{ user.email }}</h5>
+            <h5><strong>Phone : </strong>{{ user.phone_number }}</h5>
+
+            <!-- 时间信息 -->
+            <h5>
+                <strong>注册时间：</strong>
+                {{ moment(user.created_at, local=True).format('LL') }}
+            </h5>
+            <h5>
+                <strong>最近活跃时间：</strong>
+                {{ moment(user.last_seen, local=True).fromNow() }}
+            </h5>
+
+
+            {% if current_user == user %}
+            <p>
+              <a href="{{ url_for('user.edit_profile') }}" target="_blank">修改个人信息</a>
+            </p>
+            <p>
+              <a href="{{ url_for('user.change_password') }}" target="_blank">修改密码</a>
+            </p>
+            <p><a href="{{ url_for('user.change_email') }}" target="_blank">修改邮箱</a></p>
+            {% endif %}
+
+
+            <!-- 管理员操作链接 -->
+            {% if current_user.is_administer %}
+            <h5>
+                <a href="{{ url_for('user.admin_edit_profile', name=user.name) }}"
+                   target="_blank">
+                    管理员修改个人信息
+                </a>
+            </h5>
+            {% endif %}
+        </div>
     </div>
-    
-    <!-- 如果用户设置了位置，显示位置并链接到谷歌地图 -->
-    {% if user.location %}
-      <p>From <a href='https://www.google.com/maps/place/{{ user.location }}'>
-        {{ user.location }}</a></p>
-    {% endif %}
-    
-    <!-- 管理员可以看到编辑链接 -->
-    {% if current_user.is_administrator %}
-      <p><a href="{{ url_for('user.admin_edit_profile', id=user.id) }}">
-        管理员修改个人信息</a></p>
-    {% endif %}
-    
-    <!-- 显示用户简介 -->
-    {% if user.about_me %}
-      <p>{{ user.about_me }}</p>
-    {% endif %}
-    
-    <!-- 对于已登录用户，显示注册时间和最后访问时间 -->
-    {% if user.is_authenticated and current_user != user %}
-      <p>Member since {{ moment(user.created_at).format('L') }}.
-         最近一次上线时间：{{ moment(user.last_seen).fromNow() }}</p>
-    {% endif %}
-    
-    <!-- 用户可以编辑自己的信息 -->
-    {% if current_user == user %}
-      <p><a href="/user/edit-profile">修改个人信息</a></p>
-    {% endif %}
-  </div>
+
+    <br/><br/>
+</div>
+<br/><br/>
 {% endblock %}
+

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/wtf.html' import quick_form %}
+
+{% block title %}Edit Blog{% endblock %}
+
+{% block page_content %}
+  <div class='page-header'>
+    <h1>Edit Blog</h1>
+  </div>
+  <div>{{ quick_form(form) }}</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  {{ pagedown.include_pagedown() }}
+{% endblock %}

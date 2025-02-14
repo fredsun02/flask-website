@@ -7,6 +7,7 @@ class BaseConfig:
 
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'asdfasdf'
     SQLALCHEMY_TRACK_MODIFICATIONS = False  
+    BLOGS_PER_PAGE = 10
 
 class DevConfig(BaseConfig):
     '''

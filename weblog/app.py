@@ -4,6 +4,7 @@ from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_pagedown import PageDown
 
 from .handlers import blueprint_list
 from .configs import configs
@@ -22,6 +23,7 @@ def register_extensions(app):
     Moment(app)  # 现在 Moment 也注册到 Flask 了
     Migrate(app, db)
     mail.init_app(app)  # 初始化 Flask-Mail
+    PageDown().init_app(app)
 
     # 配置 Flask-Login
     login_manager = LoginManager()

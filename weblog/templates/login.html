@@ -9,5 +9,16 @@
     </div>
     <div class="col-md-4">
         {{ quick_form(form) }}
+        <br>
+        <p>
+            还没有账号？
+            <a href="{{ url_for('front.register') }}">
+                注册
+            </a>
+            <br>
+            <a href="{{ url_for('user.before_reset_password') }}">
+                忘记密码？
+            </a>
+        </p>
     </div>
 {% endblock %}

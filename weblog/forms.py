@@ -4,8 +4,11 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, PasswordField, IntegerField, RadioField, TextAreaField, SelectField
 from wtforms import ValidationError
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Regexp
+from flask_login import current_user
+from flask_pagedown.fields import PageDownField  # 从 fields 子模块导入
 
 from .models import db, User, Role
+from .email import send_email
 
 class RegisterForm(FlaskForm):
     '''注册表单类'''
@@ -26,6 +29,29 @@ class RegisterForm(FlaskForm):
         if User.query.filter_by(name=field.data).first():
             raise ValidationError('Name already registered.')
         
+    def create_user(self):
+        '''创建新用户并存入数据库，发送验证邮件'''
+        user = User()
+        # 自动将表单中的所有字段数据（name、email、password等）
+        # 复制到 user 对象的对应属性中
+        # 相当于：
+        # user.name = self.name.data
+        # user.email = self.email.data
+        # user.password = self.password.data
+        self.populate_obj(user)
+        # 添加头像路由
+        user.avatar_hash = user.gravatar()
+        db.session.add(user)
+        db.session.commit()
+        # 发送验证邮件
+        # 使用令牌生成器生成 token，作为验证链接的一部分
+        # 视图函数 front.confirm_user 会调用 user.confirm_user 方法
+        # 该方法使用令牌生成器的 loads 验证 token
+        token = user.generate_confirm_user_token()
+        send_email(user, user.email, 'confirm_user', token)
+        return user
+
+
 class LoginForm(FlaskForm):
     '''登录表单类'''
 
@@ -83,3 +109,74 @@ class AdminProfileForm(FlaskForm):
         # 初始化表单类实例时，需要定义好 SelectField 所需的选项列表
         self.role_id.choices = [(role.id, role.name) for role in Role.query.order_by(Role.name).all()]
         
+
+class NotEqualTo:
+    """
+    验证两个字段的值不相等
+    """
+    def __init__(self, fieldname, message=None):
+        self.fieldname = fieldname
+        self.message = message or '新密码不能与旧密码相同'
+
+    def __call__(self, form, field):
+        try:
+            other = form[self.fieldname]
+        except KeyError:
+            raise ValidationError(field.gettext("Invalid field name '%s'.") % self.fieldname)
+        
+        if field.data == other.data:
+            raise ValidationError(self.message)
+
+
+class ChangePasswordForm(FlaskForm):
+    '''用户登录后更换密码表单类'''
+    old_password = PasswordField('旧密码', validators=[DataRequired()])
+    password = PasswordField('新密码', validators=[DataRequired(), Length(3, 22), NotEqualTo('old_password', message='新密码不能与旧密码相同')])
+    repeat_password = PasswordField('重复新密码', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('递交')
+
+    def validate_old_password(self, field):
+        if not current_user.verify_password(self.old_password.data):
+            raise ValidationError('旧密码错误')
+        
+class BeforeResetPasswordForm(FlaskForm):
+    '''忘记密码时利用邮箱重置密码前所使用的【邮箱】表单类'''
+    email = StringField('邮箱', validators=[DataRequired(), Email()])
+    submit = SubmitField('提交')
+
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValidationError('未注册')
+        
+
+class ResetPasswordForm(FlaskForm):
+    '''忘记密码时利用邮箱重置密码时所使用的【密码】表单类'''
+
+    password = PasswordField('新密码', validators=[DataRequired(), Length(3, 22)])
+    repeat_password = PasswordField('重复新密码', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('递交')
+
+
+
+class ChangeEmailForm(FlaskForm):
+    '''用户登录后更换邮箱表单类'''
+    email = StringField('新邮箱', validators=[DataRequired(), Email()])
+    repeat_email = StringField('重复新邮箱', validators=[DataRequired(), EqualTo('email')])
+    password = PasswordField('密码', validators=[DataRequired()])
+    submit = SubmitField('递交')
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('邮箱已存在')
+        
+    def validate_password(self, field):
+        if not current_user.verify_password(field.data):
+            raise ValidationError('密码错误')
+
+class BlogForm(FlaskForm):
+    '''博客表单类'''
+
+    # 这里使用 Flask-PageDown 提供的字段类，以支持 Markdown 编辑
+    # 前端再设置一下预览，就可以在输入框输入 Markdown 语句并显示在页面上
+    body = PageDownField('博客内容', validators=[DataRequired()])
+    submit = SubmitField('提交')

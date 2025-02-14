@@ -3,16 +3,54 @@ from flask import render_template, current_app, make_response
 from flask_login import login_required, login_user, logout_user, current_user
 from datetime import datetime
 
-from ..forms import RegisterForm, LoginForm
-from ..models import db, User
+from ..forms import RegisterForm, LoginForm, BlogForm
+from ..models import db, User, Blog
 from ..email import send_email
 
 front = Blueprint('front', __name__) # front.py - 主页相关
 
-@front.route('/')
+@front.route('/', methods=['GET', 'POST'])
 def index():
+    '''主页'''
     date_time = datetime.utcnow()
-    return render_template('index.html', date_time=date_time)
+    form = BlogForm()
+    # 只要用户登录成功，就可以发表博客
+    if current_user.is_authenticated and form.validate_on_submit():
+        blog = Blog()
+        form.populate_obj(blog)
+        blog.author = current_user
+        db.session.add(blog)
+        db.session.commit()
+        flash('发表成功', 'success')
+        return redirect(url_for('.index'))
+    # 从 URL 参数中获取页码，默认为第 1 页
+    # 例如：/?page=2，如果没有 page 参数则返回 1
+    page = request.args.get('page', 1, type=int)
+
+    # 使用 SQLAlchemy 的 paginate 方法进行分页查询
+    pagination = Blog.query.order_by(Blog.time_stamp.desc()).paginate(
+            page=page,  # 当前页码
+            per_page=current_app.config['BLOGS_PER_PAGE'],  # 每页显示的博客数量
+            error_out=False  # 当页码超出范围时不报错，而是返回空列表
+    )
+
+    # 获取当前页的博客列表
+    blogs = pagination.items
+
+    # 将分页对象和博客列表传递给模板
+    return render_template('index.html', 
+                         form=form,  # 发博客的表单
+                         blogs=blogs,  # 当前页的博客列表
+                         pagination=pagination)  # 分页对象，用于生成分页导航
+
+@front.route('/blog/<int:id>')
+def blog(id):
+    '''博客详情页'''
+    blog = Blog.query.get_or_404(id)
+    # hidebloglink 为布尔值，用于隐藏博客详情页的链接
+    # noblank 为布尔值，用于告诉浏览器不要在新窗口打开博客详情页的链接
+    return render_template('blog.html', blogs=[blog], hidebloglink = True, noblank = True)
+
 
 @front.app_errorhandler(404)
 def page_not_found(e):
@@ -35,11 +73,7 @@ def register():
     '''
     form = RegisterForm()
     if form.validate_on_submit():
-        user = User(name=form.name.data, email=form.email.data, password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        token = user.generate_confirm_user_token() # 生成验证 token
-        send_email(user, user.email, 'confirm_user', token) # 调用方法 send_email() 发送验证邮件
+        form.create_user() # 调用方法 create_user() 创建用户
         flash('恭喜注册成功，请登录', 'success')
         # 重定向至登录页面
         return redirect(url_for('.login'))

@@ -1,0 +1,45 @@
+<!-- 分页宏 -->
+{% macro render_pagination(pagination, endpoint) %}
+<nav class="nav-pagination" aria-label="Page navigation" align="center">
+    <ul class="pagination">
+        <!-- 上一页按钮 -->
+        <li {% if not pagination.has_prev %}class="disabled"{% endif %}>
+            <a href="{{ url_for(endpoint, page=pagination.prev_num) if pagination.has_prev else '#' }}">
+                &laquo;
+            </a>
+        </li>
+
+        <!-- 页码按钮 -->
+        {% for page in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+            {% if page %}
+                {% if page != pagination.page %}
+                    <!-- 非当前页 -->
+                    <li>
+                        <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+                    </li>
+                {% else %}
+                    <!-- 当前页（高亮显示） -->
+                    <li class="active">
+                        <a href="#">
+                            {{ page }}
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                {% endif %}
+            {% else %}
+                <!-- 省略号 -->
+                <li>
+                    <span class="ellipsis">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- 下一页按钮 -->
+        <li {% if not pagination.has_next %}class="disabled"{% endif %}>
+            <a href="{{ url_for(endpoint, page=pagination.next_num) if pagination.has_next else '#' }}">
+                &raquo;
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endmacro %}

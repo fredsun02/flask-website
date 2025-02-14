@@ -1,6 +1,6 @@
 {% extends 'bootstrap/base.html' %} 
 
-{% block title %}{% endblock %} 
+{% block title %}WEBLOG{% endblock %} 
 
 {% block head %}
   {{ super() }} 
@@ -60,8 +60,8 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li>
-                            <a href="{#{ url_for('user.change_password') }#}"> <!-- 这里有个注释：.change_password() 尚未实装-->
-                              修改密码（尚未实装）</a
+                            <a href="{{ url_for('user.change_password') }}">
+                              修改密码（测试实装）</a
                               >
                         </li>
                         <li role="separator" class="divider"></li>
@@ -81,13 +81,38 @@
   <div class="container">
 
     <!-- 显示页面顶部的 flash 消息 START -->
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-    <div class="alert alert-{{  category  }} alert-dismissble" role="alert">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
         {{ message }}
     </div>
     {% endfor %}
     <!-- 显示页面顶部的 flash 消息 END-->
+
+    <style>
+    .profile-thumbnail {
+        width: 32px !important;  /* 使用 !important 确保样式优先级 */
+        height: 32px !important;
+        margin-right: 10px;
+        object-fit: cover;  /* 确保图片比例正确 */
+    }
+
+    .post-thumbnail {
+        float: left;
+        margin-right: 10px;
+    }
+
+    .post-content {
+        margin-left: 48px;  /* 32px + 10px margin + 额外空间 */
+    }
+
+    .post {
+        padding: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    </style>
 
     {% block page_content %} {% endblock %}
   </div>
