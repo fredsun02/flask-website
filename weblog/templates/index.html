@@ -7,12 +7,50 @@
 {% block page_content %}
     <!-- 页面头部 -->
     <div class="page-header">
+        <h1>欢迎来到 Weblog</h1>
+        <br />
+        <!-- 功能介绍区域 -->
+        <div class="features-intro">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <h4>博客系统</h4>
+                        <ul>
+                            <li>支持 Markdown 编写</li>
+                            <li>实时预览功能</li>
+                            <li>分页展示</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <h4>用户管理</h4>
+                        <ul>
+                            <li>邮箱验证注册</li>
+                            <li>个人资料管理</li>
+                            <li>Gravatar 头像支持</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <h4>安全特性</h4>
+                        <ul>
+                            <li>角色权限管理</li>
+                            <li>密码重置功能</li>
+                            <li>防 XSS 攻击</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p>当前时间：{{ moment(date_time).format('LLL') }}</p>
+        <p>上次刷新页面时间据现在：{{ moment(date_time).fromNow(refresh=True) }}</p>
         <h1>
-            Hello 
+            Hello!
             {% if current_user.name %}
                 {{ current_user.name }}
-            {% else %}
-                Stranger
             {% endif %}
         </h1>
         <br>
@@ -23,6 +61,11 @@
                 {{ quick_form(form) }}
             </div>
             <br>
+        {% else %}
+            <div class="login-prompt">
+                <p>还没有账号？<a href="{{ url_for('front.register') }}">立即注册</a></p>
+                <p>已有账号？<a href="{{ url_for('front.login') }}">登录</a></p>
+            </div>
         {% endif %}
     </div>
 
@@ -46,11 +89,32 @@
     {{ pagedown.include_pagedown() }}
 {% endblock %}
 
-<style>
-.profile-thumbnail {
-    width: 32px;
-    height: 32px;
-    margin-right: 10px;
-}
-</style>
-    
+{% block styles %}
+    {{ super() }}
+    <style>
+        .feature-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .feature-box h4 {
+            color: #337ab7;
+            margin-bottom: 15px;
+        }
+        .feature-box ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .feature-box li {
+            margin: 5px 0;
+            color: #666;
+        }
+        .login-prompt {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}

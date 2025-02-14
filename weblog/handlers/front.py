@@ -41,8 +41,8 @@ def index():
     return render_template('index.html', 
                          form=form,  # 发博客的表单
                          blogs=blogs,  # 当前页的博客列表
-                         pagination=pagination)  # 分页对象，用于生成分页导航
-
+                         pagination=pagination, # 分页对象，用于生成分页导航
+                         date_time=date_time)
 @front.route('/blog/<int:id>')
 def blog(id):
     '''博客详情页'''
