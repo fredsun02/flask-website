@@ -73,38 +73,23 @@ Now open your browser and visit: **[http://127.0.0.1:5000](http://127.0.0.1:5000
 ## Project Structure
 ```
 flask-website/
-    ├── README.md               # Project documentation and overview
-    ├── log.md                  # Development logs and notes
-    ├── manage.py               # CLI entry point for managing the application
-    ├── migrations               # Database migration files
-    ├── requirements.txt         # List of Python dependencies
-    └── weblog                   # Main application folder
-        ├── __init__.py         # Initialisation for the weblog package
-        ├── app.py               # Application factory and main app setup
-        ├── configs.py           # Configuration settings for the application
-        ├── decorators.py         # Custom decorators for permission checks
-        ├── email.py             # Email sending functionality
-        ├── forms.py             # Form classes for user input
-        └── handlers              # Directory for view functions (blueprints)
-            ├── front.py            # Front blueprint
-            └── user.py            # User blueprint
-        ├── models.py            # Database models and ORM definitions
-        └── templates             # HTML templates for rendering views
-            ├── 404.html         # Custom 404 error page
-            ├── 500.html         # Custom 500 error page
-            ├── base.html        # Base template for other templates to extend
-            ├── email            # Email templates
-            │   ├── confirm_user.html  # HTML template for user confirmation email
-            │   ├── confirm_user.txt    # Plain text version of confirmation email
-            │   ├── reset_password.html  # HTML template for password reset email
-            │   └── reset_password.txt    # Plain text version of password reset email
-            ├── index.html       # Homepage template
-            ├── login.html       # Login page template
-            ├── register.html    # Registration page template
-            └── user             # User-related templates
-                ├── confirm.html  # User confirmation page template
-                ├── edit_profile.html  # User profile editing page template
-                └── index.html    # User's personal homepage template
+├── README.md               # Project documentation
+├── log.md                 # Development logs
+├── manage.py              # CLI entry point
+├── migrations/            # Database migrations
+├── requirements.txt       # Dependencies
+├── scripts/              # Utility scripts
+│   └── generate_fake_data.py  # Test data generator
+└── weblog/               # Main application package
+    ├── handlers/         # View functions (blueprints)
+    ├── templates/        # HTML templates
+    ├── static/           # Static files (CSS, JS, etc.)
+    ├── app.py            # Application factory
+    ├── configs.py        # Configuration settings
+    ├── decorators.py     # Custom decorators
+    ├── email.py          # Email functionality
+    ├── forms.py          # Form definitions
+    └── models.py         # Database models
 ```
 ---
 
