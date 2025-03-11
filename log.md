@@ -403,7 +403,7 @@
 
 3. **权限控制**
    ```python
-   if current_user != blog.author and not current_user.is_administrator():
+   if current_user != blog.author and not current_user.is_administrator:
        abort(403)
    ```
 
@@ -424,3 +424,77 @@
 - Flask-PageDown
 - Markdown
 - Bleach
+
+### 开发日志 15.02.25
+
+修改 decorator 装饰器，从原本 abort(403) 改为 return redirect(url_for('front.index'))，同时 flash('你这个号权限太低啦', 'warning')
+
+### 开发日志 - 11.03.25
+
+#### 今日开发内容
+今天主要实现了用户关注系统的功能，包括关注/取消关注用户、显示关注状态以及关注列表的展示。
+
+#### 实现功能
+1. **用户关注功能**
+   - 实现了用户关注和取消关注功能
+   - 添加了关注状态显示（互相关注、已关注等）
+   - 实现了性别相关的代词显示（他/她/TA）
+
+2. **关注列表展示**
+   - 实现了用户关注列表的展示
+   - 实现了用户粉丝列表的展示
+   - 添加了分页功能
+   ```python
+   @user.route('<name>/followed')
+   def followed(name):
+       '''显示user关注的用户列表'''
+       user = User.query.filter_by(name=name).first()
+       if not user:
+           flash('用户不存在', 'warning')
+           return redirect(url_for('front.index'))
+       page = request.args.get('page', 1, type=int)
+       pagination = user.followed.paginate(
+           page=page,
+           per_page=10,
+           error_out=False
+       )
+       follows = []
+       for follow in pagination.items:
+           follow_dict = {
+               'user': follow.followed,      # 被关注的用户对象
+               'time_stamp': follow.time_stamp  # 关注的时间
+           }
+           follows.append(follow_dict)
+       return render_template('user/follow.html', 
+                            user=user, 
+                            title="我关注的人",
+                            endpoint='user.followed', 
+                            pagination=pagination,
+                            follows=follows)
+   ```
+
+3. **权限控制**
+   - 添加了关注功能的权限检查
+   - 只有登录用户才能看到关注按钮
+   - 用户不能关注自己
+
+#### 关键技术 & 原理
+1. **关注关系处理**
+   - 使用中间表存储关注关系
+   - 通过 SQLAlchemy 的 relationship 实现多对多关系
+   - 记录关注时间戳
+
+2. **状态判断方法**
+   - `is_following()` 判断是否已关注
+   - `is_followed_by()` 判断是否被关注
+   - 结合两个方法判断是否互相关注
+
+#### 遇到的 Bug & 解决方案
+| **问题** | **原因** | **解决方案** |
+|----------|---------|-------------|
+| 分页参数错误 | 配置项未正确加载 | 临时使用固定值10作为每页显示数量 |
+| 权限检查报错 | 错误的方法调用方式 | 修正权限检查的调用方式 |
+| 模板渲染错误 | 条件判断顺序问题 | 调整模板中条件判断的顺序 |
+
+
+

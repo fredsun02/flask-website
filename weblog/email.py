@@ -46,7 +46,7 @@ def send_email(user, email, tmp, token):
             'To: ' + user.name, # 邮件主题
             sender = app.config.get('MAIL_DEFAULT_SENDER'), # 发件人邮箱
             recipients = [email]  # 收件人列表
-    )
+    ) 
 
     '''
     特性:
@@ -65,6 +65,8 @@ def send_email(user, email, tmp, token):
     
     msg.html = render_template('email/{}.html'.format(tmp), user=user,
             token=token)    # HTML 文件
+    
+    print(msg)
     
     thread = Thread(target=send_async_email, args=(app, msg))
     thread.start()          # 创建一个子线程并启动

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import render_pagination %}
+
+{% block title %}
+    {{ user.name }} - {{ title }}
+{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+    </div>
+
+    <table class="table table-hover followers">
+        <thead>
+            <tr>
+                <th>用户</th>
+                <th>关注时间</th>
+            </tr>
+        </thead>
+        {% for f in follows %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('user.index', name=f.user.name) }}">
+                        <img class="img-rounded" src="{{ f.user.gravatar(size=32) }}" />
+                        <big>&nbsp;{{ f.user.name }}</big>
+                    </a>
+                </td>
+                <td>
+                    <big>{{ moment(f.time_stamp).format('L') }}</big>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {{ render_pagination(pagination, endpoint) }}
+{% endblock %}

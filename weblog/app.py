@@ -43,6 +43,7 @@ def register_extensions(app):
 
 def create_app(config):
     app = Flask(__name__)
+    app.config.from_object('weblog.configs.BaseConfig')
     app.config.from_object(configs.get(config))
 
     register_extensions(app)

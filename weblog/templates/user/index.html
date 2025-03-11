@@ -60,7 +60,70 @@
             <p><a href="{{ url_for('user.change_email') }}" target="_blank">修改邮箱</a></p>
             {% endif %}
 
+            <!-- 关注人数/粉丝数量 关注/取关 START -->
+            <h4>
+                <small>
+                    <!-- 关注/粉丝数量显示 -->
+                    <a href="{{ url_for('user.followed', name=user.name) }}">
+                        关注 
+                        <span class="badge">{{ user.followed.count() }}</span>
+                    </a>
+                    <a href="{{ url_for('user.followers', name=user.name)}}">
+                        粉丝
+                        <span class="badge">{{ user.followers.count() }}</span>
+                    </a>
+                </small>
 
+                <!-- 如果有用户已登录，已登录用户不是 user 且有“关注“权限 START -->
+                {% if current_user.is_authenticated %}
+                {% if current_user != user and current_user.has_permission(Permission.FOLLOW) %}
+                    &nbsp | &nbsp
+                    
+                    <!-- 如果当前已登录用户未关注 user -->
+                    {% if not current_user.is_following(user) %}
+                        <a href="{{ url_for('user.follow', name=user.name) }}" class="btn btn-primary">
+                            关注
+                        </a>
+                    <!-- 如果当前已登录用户已经关注了 user -->
+                    {% else %}
+                        <a href="{{ url_for('user.unfollow', name=user.name) }}" class="btn btn-default">
+                            取消关注
+                        </a>
+                    {% endif %}
+
+                    <!-- 如果 user 关注了已登录用户，并且已登录用户关注了 user -->
+                    {% if user.is_following(current_user) and current_user.is_following(user) %}
+                        <small>互相关注</small>
+                    <!-- 如果已登录用户关注了 user -->
+                    {% elif current_user.is_following(user) %}
+                        <small>
+                            你关注了
+                            {% if user.gender.value == '男性' %}
+                                他
+                            {% elif user.gender.value == '女性' %}
+                                她
+                            {% else %}
+                                TA
+                            {% endif %}
+                        </small>
+                <!-- 如果 user 关注了已登录用户 -->
+                    {% elif user.is_following(current_user) %}
+                        <small>
+                            {% if user.gender.value == '男性' %}
+                                他
+                            {% elif user.gender.value == '女性' %}
+                                她
+                            {% else %}
+                                TA
+                            {% endif %}
+                            关注了你
+                        </small>
+                    {% endif %}
+                    {% endif %}
+                    <!-- 如果有用户已登录，已登录用户不是 user 且有“关注“权限 END -->
+                {% endif %}
+                </h4>
+            <!-- 关注人数/粉丝数量 关注/取关 END -->
             <!-- 管理员操作链接 -->
             {% if current_user.is_administer %}
             <h5>

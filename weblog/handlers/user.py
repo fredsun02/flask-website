@@ -8,7 +8,7 @@ from flask import request, current_app
 from flask_login import login_required, current_user, login_user
 import flask_bootstrap
 
-from ..models import User, db, Role, Blog
+from ..models import User, db, Role, Blog, Permission
 from ..forms import ProfileForm, AdminProfileForm, ChangePasswordForm, BeforeResetPasswordForm, ResetPasswordForm, ChangeEmailForm, BlogForm
 from ..decorators import admin_required
 from ..email import send_email
@@ -22,7 +22,7 @@ def index(name):
     if user is None:
         abort(404)
     blogs = user.blogs.order_by(Blog.time_stamp.desc()).all()
-    return render_template('user/index.html', user=user, blogs=blogs)
+    return render_template('user/index.html', user=user, blogs=blogs, Permission=Permission)
 
 @user.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
@@ -39,7 +39,7 @@ def edit_profile():
         db.session.add(current_user)
         db.session.commit()
         flash('个人信息已更新', 'success')
-        return redirect(url_for('.index', name=current_user.name))
+        return redirect(url_for ('.index', name=current_user.name))
     else:
         print("表单验证失败")
         print("表单错误:", form.errors)  # 打印表单错误
@@ -54,6 +54,7 @@ def admin_edit_profile(id):
     '''管理员修改用户信息'''
     user = User.query.get(id)
     form = AdminProfileForm(user, obj=user)
+    print("Hello")
     if form.validate_on_submit():
         form.populate_obj(user)
         db.session.add(user)
@@ -152,7 +153,7 @@ def confirm_change_email(token):
 def edit_blog(id):
     '''编辑博客'''
     blog = Blog.query.get_or_404(id)
-    if current_user != blog.author and not current_user.is_administrator():
+    if current_user != blog.author and not current_user.is_administrator:
         abort(403)
     form = BlogForm(obj=blog)
     if form.validate_on_submit():
@@ -162,3 +163,85 @@ def edit_blog(id):
         flash('博客已更新', 'success')
         return redirect(url_for('front.blog', id=blog.id))
     return render_template('user/edit_blog.html', form=form)
+
+@user.route('/follow/<name>')
+@login_required
+def follow(name):
+    '''关注指定用户'''
+    user = User.query.filter_by(name=name).first()
+    if not user:
+        flash('用户不存在', 'warning')
+        return redirect(url_for('front.index'))
+    if current_user.is_following(user):
+        flash('已关注', 'info')
+    else:
+        current_user.follow(user)
+        flash('关注成功！', 'success')
+    return redirect(url_for('.index', name=name))
+
+@user.route('/unfollow/<name>')
+@login_required
+def unfollow(name):
+    '''取关指定用户'''
+    user = User.query.filter_by(name=name).first()
+    if not user:
+        flash('用户不存在', 'warning')
+        return redirect(url_for('front.index'))
+    if not current_user.is_following(user):
+        flash('用户未关注！', 'info')
+    else:
+        current_user.unfollow(user)
+        flash('取消关注成功！', 'success')
+    return redirect(url_for('.index', name=name))
+
+@user.route('<name>/followed')
+def followed(name):
+    '''显示user关注的用户列表'''
+    user = User.query.filter_by(name=name).first()
+    if not user:
+        flash('用户不存在', 'warning')
+        return redirect(url_for('front.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followed.paginate(
+        page=page,
+        # per_page=current_app.config['USERS_PER_PAGE'],
+        per_page=10, # 暂时使用固定值
+        error_out=False
+    )
+
+    follows = []
+    for follow in pagination.items:
+        follow_dict = {
+            'user': follow.followed,      # 被关注的用户对象
+            'time_stamp': follow.time_stamp  # 关注的时间
+        }
+        follows.append(follow_dict)
+
+    return render_template('user/follow.html', user=user, title="我关注的人",
+                           endpoint='user.followed', pagination=pagination,
+                           follows=follows)
+
+@user.route('<name>/followers')
+def followers(name):
+    '''显示user的粉丝列表'''
+    user = User.query.filter_by(name=name).first()
+    if not user:
+        flash('用户不存在', 'warning')
+        return redirect(url_for('front.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followers.paginate(
+        page=page,
+        # per_page=current_app.config['USERS_PER_PAGE'],
+        per_page=10, # 暂时使用固定值
+        error_out=False
+    )
+    follows = []
+    for follow in pagination.items:
+        follow_dict = {
+            'user': follow.follower,
+            'time_stamp': follow.time_stamp
+        }
+        follows.append(follow_dict)
+    return render_template('user/follow.html', user=user, title="我的粉丝",
+                           endpoint='user.followers', pagination=pagination,
+                           follows=follows)

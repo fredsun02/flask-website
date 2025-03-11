@@ -50,6 +50,14 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role: {}>'.format(self.name)
 
+class Follow(db.Model):
+    '''存储用户关注信息的**双主键**类'''
+    __tablename__ = 'follows'
+
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    time_stamp = db.Column(db.DateTime, default=datetime.now)
+
 class User(db.Model, UserMixin):
     """
     用户模型，包含基本信息和密码加密存储功能
@@ -75,6 +83,40 @@ class User(db.Model, UserMixin):
 
     confirmed = db.Column(db.Boolean, default=False) # 用于验证user是否已经通过邮箱验证，缺省值为 False
 
+    # 此属性为「我关注了谁」，属性值为查询对象，里面是 Follow 类的实例
+    # 参数 foreign_keys 意为查询 User.id 值等于 Follow.follower_id 的数据
+    followed = db.relationship('Follow', foreign_keys=[Follow.follower_id],
+        # 反向查询接口 follower 定义了 Follow 实例的属性，指向关注关系中的「关注者」，对应 Follow().follower_id 属性
+        # User 实例使用 followers 属性获得 Follow 实例的时候，这些 Follow 实例的 follower 属性会指向 User 实例
+        # 也就是「关注者」
+        backref=db.backref('follower', lazy='joined'), 
+        # 这里创建了虚拟属性！
+        # 虚拟属性是指在关系中不实际存储但在查询时可以方便地访问的属性。当我们访问 follow.follower 时
+        # SQLAlchemy看到follower这个属性
+        # 发现这是一个relationship，所以会去User模型中查找
+        # 发现这是通过User模型中的relationship定义的backref创建的
+        # 知道要用follow.follower_id去查询User表
+        # 自动执行类似这样的SQL：
+        # SELECT * FROM user WHERE id = follow.follower_id
+
+
+        # lazy='joined' 模式允许立即从联结查询中加载相关对象。
+        # 例如，当某个用户关注了 100 个用户
+        # 调用 user.followed.all() 后会返回一个列表，其中包含 100 个 Follow 实例，每一个实例的 follower 和 followed 回引属性都指向对应的用户
+        # 设定为 lazy='joined' 模式，即可在一次数据库查询中完成这些操作
+        # 如果把 lazy 设为默认值 select
+        # 那么首次访问 follower 和 followed 属性时才会加载对应的用户
+        # 而且每个属性都需要一个单独的查询
+        # 这就意味着获取全部被关注用户时需要增加 100 次额外的数据库查询操作
+        cascade='all, delete-orphan', lazy='dynamic') # 设置级联行为：
+        # 1. all: 所有操作都级联（包括 save-update, merge, refresh-expire, expunge, delete）
+        # 2. delete-orphan: 当记录与父对象解除关联时，自动删除这条记录
+
+    # 此属性可获得数据库中「谁关注了我」的查询结果，它是 Follow 实例的列表
+    followers = db.relationship('Follow', foreign_keys=[Follow.followed_id],
+            backref=db.backref('followed', lazy='joined'),
+            cascade='all, delete-orphan', lazy='dynamic')
+    
 
     def __init__(self, **kw):
         '''初始化实例，给用户增加默认角色'''
@@ -217,7 +259,35 @@ class User(db.Model, UserMixin):
         url = 'https://www.gravatar.com/avatar'
         hash = self.avatar_hash or hashlib.md5(self.email.encode()).hexdigest()
         return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash, size=size, default=default, rating=rating)
+    
+    def is_following(self, user):
+        '''判断当前用户是否关注了指定用户。self是当前用户, user是目标用户'''
+        return self.followed.filter_by(followed_id=user.id).first() is not None
+    
+    def is_followed_by(self, user):
+        '''判断指定用户是否关注了当前用户。self是当前用户, user是目标用户'''
+        return self.followed.filter_by(follower_id=user.id).first() is not None
+    
+    def follow(self, user):
+        '''关注指定用户'''
+        if not self.is_following(user):
+            follow = Follow(follower_id=self.id, followed_id=user.id)
+            db.session.add(follow)
+            db.session.commit()
 
+    def unfollow(self, user):
+        '''取消关注指定用户'''
+        follow = self.followed.filter_by(followed_id=user.id).first()
+        if follow:
+            db.session.delete(follow)
+            db.session.commit()
+
+    @property
+    def followed_posts(self):
+        '''获取当前用户关注的人的博客'''
+        return Blog.query.join(Follow, Follow.followed_id==Blog.author_id).filter(Follow.follower_id==self.id)
+        # 使用 join 连接 Follow 和 Blog 表，只需一次数据库查询
+    
 class Permission:
     '''权限类'''
     FOLLOW = 1 # 关注
@@ -289,7 +359,6 @@ class Blog(db.Model):
         #    <strong>Hello</strong> https://example.com
         # 4. 处理链接：
         #    <strong>Hello</strong> <a href="https://example.com">https://example.com</a>
-
 
 # 设置 SQLAlchemy 事件监听器：
 # 当 Blog.body 的值发生变化时，自动调用 on_changed_body 方法
