@@ -3,8 +3,19 @@
 {% block title %}WEBLOG{% endblock %} 
 
 {% block head %}
-  {{ super() }} 
-{% endblock %} 
+  {{ super() }}  {# 保留父模板中 head 块的所有内容 #}
+  
+  {# 设置网站图标 #}
+  <link rel="icon" href="https://www.gravatar.com/avatar/{{ 'sunshen02@gmail.com' | gravatar }}?s=32" type="image/png">
+
+  
+  
+  {# 引入自定义 CSS 样式文件 #}
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+  
+  <!-- 添加 Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+{% endblock %}
 
 {% block navbar %}
   <div class="navbar navbar-inverse" role="navigation">
@@ -32,6 +43,9 @@
         <!-- 导航栏左侧按钮 START -->
         <ul class="nav navbar-nav">
           <li><a href="/">Home</a></li>
+        </ul>
+        <ul class="nav navbar-nav">
+          <li><a href="/blogs">Blogs</a></li>
         </ul>
         <!-- 导航栏左侧按钮 END -->
 

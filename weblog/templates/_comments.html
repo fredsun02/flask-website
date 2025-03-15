@@ -1,0 +1,57 @@
+<ul class="comments">
+    {% for comment in comments %}
+    <li class="comments" style="list-style-type:none;">
+      <div class="row">
+        <!-- 评论者的头像 START -->
+        <div class="col-md-1 comment-avatar">
+          <a href="{{ url_for('user.index', name=comment.author.name) }}">
+            <img
+              class="img-rounded profile-thumbnail"
+              src="{{ comment.author.gravatar(size=40) }}"
+            />
+          </a>
+        </div>
+        <!-- 评论者的头像 END -->
+        <!-- 评论者和评论发表时间 START -->
+        <div class="col-md-11 comment-content">
+          <div class="comment-author">
+            <a href="{{ url_for('user.index', name=comment.author.name) }}">
+              {{ comment.author.name }}</a
+            >
+            &nbsp
+            <!-- 如果当前用户有管理评论的权限 START -->
+            {% if moderate or current_user.is_moderator %} {% if comment.disable
+            %}
+            <a
+              class="btn btn-default btn-xs"
+              href="{{ url_for('front.enable_comment', id=comment.id) }}"
+              >Enable</a
+            >
+            {% else %}
+            <a
+              class="btn btn-default btn-xs"
+              href="{{ url_for('front.disable_comment', id=comment.id) }}"
+              >Disable</a
+            >
+            {% endif %} {% endif %}
+            <!-- 如果当前用户有管理评论的权限 START -->
+          </div>
+          <div class="comment-date">
+            {{ moment(comment.time_stamp).fromNow() }}
+          </div>
+        </div>
+        <!-- 评论者和评论发表时间 END -->
+      </div>
+      <!-- 评论内容 START -->
+      <div class="comment-body">
+        <!-- 如果评论被禁掉 -->
+        {% if comment.disable %}
+        <p><i>该评论已被管理员隐藏。</i></p>
+        {% endif %}
+        <!-- 如果评论没有被禁掉或当前登录用户有管理评论权限 -->
+        {% if moderate or not comment.disable %} {{ comment.body }} {% endif %}
+      </div>
+      <!-- 评论内容 END -->
+    </li>
+    {% endfor %}
+</ul>

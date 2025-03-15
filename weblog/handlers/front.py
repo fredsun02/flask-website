@@ -2,12 +2,41 @@ from flask import Blueprint, url_for, redirect, flash, abort, request
 from flask import render_template, current_app, make_response
 from flask_login import login_required, login_user, logout_user, current_user
 from datetime import datetime
+import hashlib
 
-from ..forms import RegisterForm, LoginForm, BlogForm
-from ..models import db, User, Blog
+from ..forms import RegisterForm, LoginForm, BlogForm, CommentForm
+from ..models import db, User, Blog, Comment, Permission
 from ..email import send_email
+from ..decorators import moderate_required
+
 
 front = Blueprint('front', __name__) # front.py - 主页相关
+
+# 添加 Gravatar 过滤器
+@front.app_template_filter('gravatar')
+def gravatar_filter(email):
+    """
+    Jinja2 模板过滤器：将邮箱转换为 Gravatar 头像的 MD5 哈希值
+    
+    工作原理：
+    1. 在模板中使用 {{ email | gravatar }} 时会自动调用此函数
+    2. 函数接收邮箱字符串，返回其 MD5 哈希值
+    3. Gravatar 使用这个哈希值作为头像的唯一标识
+    
+    使用示例：
+    在模板中：{{ 'example@email.com' | gravatar }}
+    输出示例：d4c74594d841139328695756648b6bd6
+    
+    最终在 img 标签中生成的 URL 示例：
+    https://www.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=200
+    
+    Args:
+        email (str): 用户邮箱地址
+        
+    Returns:
+        str: 邮箱的 MD5 哈希值
+    """
+    return hashlib.md5(email.encode()).hexdigest()
 
 @front.route('/', methods=['GET', 'POST'])
 def index():
@@ -43,13 +72,32 @@ def index():
                          blogs=blogs,  # 当前页的博客列表
                          pagination=pagination, # 分页对象，用于生成分页导航
                          date_time=date_time)
-@front.route('/blog/<int:id>')
+
+@front.route('/blog/<int:id>', methods=['GET', 'POST'])
 def blog(id):
     '''博客详情页'''
     blog = Blog.query.get_or_404(id)
     # hidebloglink 为布尔值，用于隐藏博客详情页的链接
     # noblank 为布尔值，用于告诉浏览器不要在新窗口打开博客详情页的链接
-    return render_template('blog.html', blogs=[blog], hidebloglink = True, noblank = True)
+    # 页面提供评论输入框
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data,
+                          blog=blog,
+                          author=current_user._get_current_object())
+        db.session.add(comment)
+        db.session.commit()
+        flash('评论发表成功', 'success')
+        return redirect(url_for('.blog', id=blog.id))
+    page = request.args.get('page', 1, type=int)
+    pagination = blog.comments.order_by(Comment.time_stamp.desc()).paginate(
+        page=page,
+        per_page=10, # 暂时使用固定值
+        # per_page=current_app.config['COMMENTS_PER_PAGE'],
+        error_out=False
+    )
+    comments = pagination.items
+    return render_template('blog.html', blogs=[blog], hidebloglink = True, noblank = True, form=form, comments=comments, pagination=pagination, Permission=Permission)
 
 
 @front.app_errorhandler(404)
@@ -73,7 +121,7 @@ def register():
     '''
     form = RegisterForm()
     if form.validate_on_submit():
-        form.create_user() # 调用方法 create_user() 创建用户
+        form.create_user() # 调用方法 create_user() 创x建用户
         flash('恭喜注册成功，请登录', 'success')
         # 重定向至登录页面
         return redirect(url_for('.login'))
@@ -154,3 +202,44 @@ def confirm_user(token):
     else:
         flash('验证失败，链接无效', 'danger')
     return redirect(url_for('.index'))
+
+
+@front.route('/comment/disable/<int:id>')
+@moderate_required
+def disable_comment(id):
+    '''禁用评论'''
+    comment = Comment.query.get_or_404(id)
+    comment.disable = True
+    db.session.commit()
+    flash('评论已禁用', 'success')
+    # 重定向回原来的页面（比如博客详情页）
+    # 不存在时返回主页
+    return redirect(request.headers.get('Referer') or url_for('.index'))
+
+@front.route('/comment/enable/<int:id>')
+@moderate_required
+def enable_comment(id):
+    '''解封评论'''
+    comment = Comment.query.get_or_404(id)
+    comment.disable = False
+    db.session.commit()
+    flash('评论已解封', 'success')
+    # 重定向回原来的页面（比如博客详情页）
+    return redirect(request.headers.get('Referer') or url_for('.index'))
+    
+
+@front.route('/blogs')
+def blogs():
+    '''博客列表'''
+    page = request.args.get('page', 1, type=int)
+    pagination = Blog.query.order_by(Blog.time_stamp.desc()).paginate(
+        page=page,
+        per_page=current_app.config['BLOGS_PER_PAGE'],
+        error_out=False
+    )
+    blogs = pagination.items
+    # 注意这里改用 blogs.html 模板
+    return render_template('blog_list.html', 
+                         blogs=blogs, 
+                         pagination=pagination)
+

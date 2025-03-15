@@ -1,0 +1,632 @@
+/* 重置所有默认边距 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* 链接样式 */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ea6f5a;
+    text-decoration: none;
+}
+
+/* 头像样式 */
+.profile-avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    transition: all 0.6s;  /* 添加过渡效果 */
+}
+
+.profile-avatar img:hover {
+    transform: scale(1.05);  /* 悬停时放大效果 */
+}
+
+/* 卡片样式 */
+.profile-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    transition: all 0.6s;  /* 添加过渡效果 */
+}
+
+.profile-card:hover {
+    box-shadow: 5px 5px 5px #9d9d9d;
+    transform: scale(1.01);  /* 悬停时微微放大 */
+}
+
+.card-header {
+    padding: 10px 20px;  /* 减小头部内边距 */
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+/* 个人资料内容布局 */
+.profile-content {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    padding: 15px 20px;  /* 减小内容区域内边距 */
+}
+
+/* 头像容器和图片样式 */
+.profile-avatar {
+    flex: 0 0 200px;
+    padding-top: 5px;  /* 减小头像顶部间距 */
+}
+
+/* 信息区域样式 */
+.profile-info {
+    flex: 0 0 400px;
+}
+
+/* Blogin 标题样式 */
+.profile-info h2 {
+    font-size: 1.3em;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    color: #17a2b8;
+    font-weight: bold;
+}
+
+.info-item {
+    margin-bottom: 12px;
+    font-size: 16px;
+    color: #666;
+}
+
+.info-item span {
+    margin-right: 8px;
+}
+
+.info-item i {
+    margin-right: 8px;
+    width: 16px;
+    color: #666;
+}
+
+.info-item a:hover {
+    color: #ea6f5a;
+}
+
+/* 容器样式 */
+.container {
+    margin-top: 0px;  /* 设置一个更合理的上边距 */
+    padding-bottom: 20px; /* 减少底部内边距 */
+}
+
+/* 图片样式 */
+.img-fluid {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+/* 文字样式 */
+.text-muted {
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+/* 标题样式 */
+h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* 个人资料样式 */
+.profile-section img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.text-muted i {
+    margin-right: 8px;
+    width: 16px;
+}
+
+/* 链接样式 */
+.text-muted a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.text-muted a:hover {
+    color: #007bff;
+}
+
+/* 工具标题样式 */
+.tool-title {
+    border-left: 3px solid #20c997;
+    padding-left: 3px;
+    font-weight: bold;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 567px) {
+    .profile-avatar img {
+        height: 75px;
+        width: 75px;
+    }
+
+    .div-center-md {
+        text-align: center;
+    }
+}
+
+/* 文本溢出处理 */
+.line-limit-length {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 引用样式 */
+.cc {
+    border-left: 4px solid #4a9c87;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, .04);
+    margin: 10px 0 20px;
+}
+
+/* 欢迎标题区域样式 */
+.page-header {
+    margin-top: 0;     /* 移除页面标题的上边距 */
+    padding-top: 0;    /* 移除内边距 */
+    border-bottom: 1px solid #eee;  /* 保持底部边框 */
+    margin-bottom: 20px;  /* 默认是 40px，我们改小一点 */
+}
+
+.page-header h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* 时间信息样式 */
+.time-info {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+/* 导航栏样式 */
+.navbar {
+    background-color: #24292e;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.3rem 1rem;
+    min-height: 50px;
+}
+
+.navbar-brand {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 500;
+    padding-left: 15px;
+}
+
+.navbar-nav {
+    margin-right: 15px;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+.nav-link:hover {
+    color: #fff !important;
+}
+
+/* 确保导航栏容器也没有边距 */
+.navbar-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.post-title {
+    font-weight: bold;          /* 加粗 */
+    text-align: center;         /* 居中 */
+    font-size: 24px;           /* 设置字体大小 */
+    margin: 20px 0;            /* 上下外边距 */
+    color: #333;               /* 文字颜色 */
+}
+
+.blog-meta {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+    margin: 10px 0 15px;  /* 减小底部边距 */
+    font-size: 14px;
+    color: #666;
+}
+
+/* 每个元信息项的样式 */
+.blog-meta span {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* 图标样式 */
+.blog-meta i {
+    margin-right: 6px;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* 博客详情页样式 */
+.post-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: #007bff;
+}
+
+/* 详情页的内容样式 */
+.post-body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.8;
+    color: #2c3e50;
+    padding: 0 20px;  /* 移除上下内边距，只保留左右内边距 */
+    text-align: left;
+}
+
+/* 标题前的颜色方块样式 */
+.post-body h1, .post-body h2, .post-body h3 {
+    position: relative;
+    padding-left: 1em;  /* 为方块留出空间 */
+    margin: 1.5em 0 1em;
+}
+
+.post-body h1::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #3eaf7c;  /* 绿色方块 */
+    border-radius: 2px;
+}
+
+.post-body h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #2196f3;  /* 蓝色方块 */
+    border-radius: 2px;
+}
+
+.post-body h3::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #ff9800;  /* 橙色方块 */
+    border-radius: 2px;
+}
+
+/* 优化标题样式 */
+.post-body h1 {
+    font-size: 1.8em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+.post-body h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+.post-body h3 {
+    font-size: 1.25em;
+}
+
+/* 段落样式 */
+.post-body p {
+    margin: 1em 0;
+    line-height: 1.8;
+}
+
+/* 引用样式 */
+.post-body blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    color: #6a737d;
+    border-left: 0.25em solid #dfe2e5;
+    background-color: #f6f8fa;
+}
+
+/* 列表样式 */
+.post-body ul, .post-body ol {
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+/* 链接样式 */
+.post-body a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.post-body a:hover {
+    text-decoration: underline;
+}
+
+/* 简介部分特殊样式 */
+.post-intro {
+    font-size: 1.1em;
+    color: #586069;
+    padding: 1em;
+    background: #f8f9fa;
+    border-radius: 3px;
+    margin-bottom: 2em;
+}
+
+.post-body img {
+    max-width: 100%;
+    height: auto;
+    margin: 15px 0;
+}
+
+/* 博客列表页样式 */
+.blog-list {
+    margin: 20px 0;  /* 减少整体外边距 */
+}
+
+/* 博客列表中的每个博客项 */
+.blog-item {
+    margin-bottom: 30px;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+/* 博客标题样式 */
+.blog-item h2,
+.blog-item .blog-title {
+    text-align: left;  /* 左对齐 */
+    margin: 10px 0;
+    font-size: 24px;
+}
+
+/* 博客元信息容器样式 */
+.blog-item .blog-meta {
+    display: flex;
+    justify-content: flex-start;  /* 左对齐 */
+    gap: 20px;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 每个元信息项的样式 */
+.blog-item .blog-meta span {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* 图标样式 */
+.blog-item .blog-meta i {
+    margin-right: 6px;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* 博客详情页样式 */
+.post-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: #007bff;
+}
+
+/* 详情页的内容样式 */
+.post-body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.8;
+    color: #2c3e50;
+    padding: 0 20px;  /* 移除上下内边距，只保留左右内边距 */
+    text-align: left;
+}
+
+/* 标题前的颜色方块样式 */
+.post-body h1, .post-body h2, .post-body h3 {
+    position: relative;
+    padding-left: 1em;  /* 为方块留出空间 */
+    margin: 1.5em 0 1em;
+}
+
+.post-body h1::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #3eaf7c;  /* 绿色方块 */
+    border-radius: 2px;
+}
+
+.post-body h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #2196f3;  /* 蓝色方块 */
+    border-radius: 2px;
+}
+
+.post-body h3::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #ff9800;  /* 橙色方块 */
+    border-radius: 2px;
+}
+
+/* 优化标题样式 */
+.post-body h1 {
+    font-size: 1.8em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+.post-body h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+.post-body h3 {
+    font-size: 1.25em;
+}
+
+/* 段落样式 */
+.post-body p {
+    margin: 1em 0;
+    line-height: 1.8;
+}
+
+/* 引用样式 */
+.post-body blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    color: #6a737d;
+    border-left: 0.25em solid #dfe2e5;
+    background-color: #f6f8fa;
+}
+
+/* 列表样式 */
+.post-body ul, .post-body ol {
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+/* 链接样式 */
+.post-body a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.post-body a:hover {
+    text-decoration: underline;
+}
+
+/* 简介部分特殊样式 */
+.post-intro {
+    font-size: 1.1em;
+    color: #586069;
+    padding: 1em;
+    background: #f8f9fa;
+    border-radius: 3px;
+    margin-bottom: 2em;
+}
+
+.post-body img {
+    max-width: 100%;
+    height: auto;
+    margin: 15px 0;
+}
+
+/* 分页容器样式 */
+.pagination-container {
+    margin-top: 20px;    /* 控制与列表的间距 */
+    margin-bottom: 20px; /* 控制底部间距 */
+}
+
+/* 调整页面标题间距 */
+.page-title {
+    margin-bottom: 20px !important; /* 使用 !important 确保覆盖 Bootstrap 默认样式 */
+}
+
+.blog-actions {
+    margin-top: 20px;
+    padding: 10px;
+    border-top: 1px solid #eee;
+}
+
+.blog-actions .btn {
+    margin-right: 10px;
+}
+
+.blog-actions form {
+    display: inline-block;
+}
+
+.admin-actions {
+    margin-top: 10px;
+    padding: 8px 0;
+    display: flex;
+    gap: 8px;         /* 按钮之间的间距 */
+    align-items: center;
+}
+
+.admin-actions .btn {
+    padding: 4px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.admin-actions .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.admin-actions .btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.admin-actions i {
+    margin-right: 4px;
+    font-size: 12px;
+}
+
+/* 博客标题居中 */
+.post-header {
+    text-align: left;
+}

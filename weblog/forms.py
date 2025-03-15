@@ -178,5 +178,11 @@ class BlogForm(FlaskForm):
 
     # 这里使用 Flask-PageDown 提供的字段类，以支持 Markdown 编辑
     # 前端再设置一下预览，就可以在输入框输入 Markdown 语句并显示在页面上
+    title = StringField('标题', validators=[DataRequired()])
     body = PageDownField('博客内容', validators=[DataRequired()])
+    submit = SubmitField('提交')
+
+class CommentForm(FlaskForm):
+    '''评论表单类'''
+    body = TextAreaField('评论内容', validators=[DataRequired()])
     submit = SubmitField('提交')

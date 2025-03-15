@@ -302,6 +302,7 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
+    title = db.Column(db.String(64))
     time_stamp = db.Column(db.DateTime, index=True, default=datetime.now)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))  # 当用户被删除时，删除该用户发表的博客
     # 建立与 User 模型的关系
@@ -364,3 +365,15 @@ class Blog(db.Model):
 # 当 Blog.body 的值发生变化时，自动调用 on_changed_body 方法
 # 这样用户不需要手动调用转换函数，系统会自动处理格式转换
 db.event.listen(Blog.body, 'set', Blog.on_changed_body)
+
+class Comment(db.Model):
+    '''评论类'''
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    time_stamp = db.Column(db.DateTime, index=True, default=datetime.now)
+    disable = db.Column(db.Boolean)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE')) # 当父表（User）中的记录被删除时，级联删除子表（Comment）中的记录
+    author = db.relationship('User', backref=db.backref('comments', lazy='dynamic', cascade='all, delete-orphan')) # 建立与 User 模型的关系，User 为父表，Comment 为子表，设置为延迟加载，级联为删除，且当评论与用户解除关系时，自动删除评论
+    blog_id = db.Column(db.Integer, db.ForeignKey('blog.id', ondelete='CASCADE')) # 当父表（Blog）中的记录被删除时，级联删除子表（Comment）中的记录
+    blog = db.relationship('Blog', backref=db.backref('comments', lazy='dynamic', cascade='all, delete-orphan')) # 建立与 Blog 模型的关系，Blog 为父表，Comment 为子表，设置为延迟加载，级联为删除，且当评论与博客解除关系时，自动删除评论
+

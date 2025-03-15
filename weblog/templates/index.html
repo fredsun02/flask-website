@@ -5,79 +5,79 @@
 {% block title %}Weblog{% endblock %}
 
 {% block page_content %}
-    <!-- 页面头部 -->
-    <div class="page-header">
-        <h1>欢迎来到 Weblog</h1>
-        <br />
-        <!-- 功能介绍区域 -->
-        <div class="features-intro">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <h4>博客系统</h4>
-                        <ul>
-                            <li>支持 Markdown 编写</li>
-                            <li>实时预览功能</li>
-                            <li>分页展示</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <h4>用户管理</h4>
-                        <ul>
-                            <li>邮箱验证注册</li>
-                            <li>个人资料管理</li>
-                            <li>Gravatar 头像支持</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <h4>安全特性</h4>
-                        <ul>
-                            <li>角色权限管理</li>
-                            <li>密码重置功能</li>
-                            <li>防 XSS 攻击</li>
-                        </ul>
-                    </div>
-                </div>
+    <div class="container">
+        <!-- 欢迎标题区域 -->
+        <div class="page-header">
+            <h1>欢迎来到 Weblog</h1>
+            <div class="time-info">
+                当前时间：{{ moment(date_time).format('LLL') }}
+            </div>
+            <div class="time-info">
+                上次刷新页面时间据现在：{{ moment(date_time).fromNow(refresh=True) }}
             </div>
         </div>
 
-        <p>当前时间：{{ moment(date_time).format('LLL') }}</p>
-        <p>上次刷新页面时间据现在：{{ moment(date_time).fromNow(refresh=True) }}</p>
-        <h1>
-            Hello!
-            {% if current_user.name %}
-                {{ current_user.name }}
-            {% endif %}
-        </h1>
-        <br>
+        <div class="row">
+            <!-- 左侧主要内容区 -->
+            <div class="col-md-8">
+                <!-- 个人资料卡片 -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <strong>F</strong>的个人资料
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-content">
+                            <!-- 左侧头像 -->
+                            <div class="profile-avatar">
+                                <img class="img-fluid" 
+                                     alt="OwnerAvatar" 
+                                     src="https://www.gravatar.com/avatar/{{ 'sunshen02@gmail.com' | gravatar }}?s=200">
+                            </div>
+                            <!-- 右侧信息 -->
+                            <div class="profile-info">
+                                <h2>一个基于Flask的博客和论坛系统</h2>
+                                <div class="info-item">
+                                    <span>Github:</span>
+                                    <i class="fa fa-link"></i>
+                                    <a href="https://github.com/fredsun02" target="_blank">
+                                        https://github.com/fredsun02
+                                    </a>
+                                </div>
+                                <div class="info-item">
+                                    <span>建站时间:</span>
+                                    <i class="fa fa-clock-o"></i>
+                                    2025-03-15
+                                </div>
+                                <div class="info-item">
+                                    <span>联系邮箱:</span>
+                                    <i class="fa fa-envelope"></i>
+                                    <a href="mailto:sunshen02@gmail.com">
+                                        sunshen02@gmail.com
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- 博客发布表单（仅登录用户可见） -->
-        {% if current_user.is_authenticated %}
-            <div>
+                <!-- 博客发布表单 -->
+                {% if current_user.is_authenticated %}
+                <div class="card mt-4">
                 {{ quick_form(form) }}
-            </div>
-            <br>
-        {% else %}
-            <div class="login-prompt">
-                <p>还没有账号？<a href="{{ url_for('front.register') }}">立即注册</a></p>
-                <p>已有账号？<a href="{{ url_for('front.login') }}">登录</a></p>
-            </div>
-        {% endif %}
-    </div>
+                </div>
+                {% endif %}
+            
 
-    <!-- 博客列表 -->
-    {% include '_blogs.html' %}
 
-    <!-- 分页导航 -->
-    {% if pagination %}
-        <div class="pagination-nav">
-            {{ render_pagination(pagination, 'front.index') }}
+            </div>
+
+            <!-- 右侧边栏 -->
+            <div class="col-md-4">
+                <!-- slider -->
+                 {% include 'slider.html' %}
+            </div>
         </div>
-    {% endif %}
+    </div>
 {% endblock %}
 
 {% block scripts %}

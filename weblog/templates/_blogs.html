@@ -1,25 +1,30 @@
 <ul class="posts">
     {% for blog in blogs %}
     <li class="post" style="list-style-type:none;">
-        <!-- 博客作者头像 -->
-        <div class="post-thumbnail">
-            <a href="{{ url_for('user.index', name=blog.author.name) }}" target="_blank">
-                <img class="img-rounded profile-thumbnail" 
-                     src="{{ blog.author.gravatar(size=32) }}">
-            </a>
-        </div>
 
         <div class="post-content">
-            <!-- 发布时间 -->
-            <div class="post-date">
-                {{ moment(blog.time_stamp, local=True).fromNow() }}
+
+            <!-- 博客标题 -->
+            <div class="post-title">
+                {{ blog.title }}
             </div>
 
-            <!-- 作者信息 -->
-            <div class="post-author">
-                <a href="{{ url_for('user.index', name=blog.author.name) }}" target="_blank">
+            <!-- 博客元信息 -->
+            <div class="blog-meta">
+                <span>
+                    <i class="fa fa-calendar"></i>
+                    {{ moment(blog.time_stamp).format('YYYY-MM-DD') }}
+                </span>
+                
+                <span>
+                    <i class="fa fa-user"></i>
                     {{ blog.author.name }}
-                </a>
+                </span>
+                
+                <span>
+                    <i class="fa fa-file-text"></i>
+                    {{ blog.body|length }} 字
+                </span>
             </div>
 
             <!-- 博客内容 -->
@@ -46,13 +51,22 @@
                        {% if not noblank %}target="_blank"{% endif %}>
                         <span class="label label-success">Edit</span>
                     </a>
-                <!-- 管理员编辑按钮 -->
-                {% elif current_user.is_administrator %}
-                    <a href="{{ url_for('user.edit_blog', id=blog.id) }}"
-                       {% if not noblank %}target="_blank"{% endif %}>
-                        <span class="label label-danger">AdminEdit</span>
-                    </a>
                 {% endif %}
+                <!-- 管理员编辑/删除按钮 -->
+                {% if current_user.is_administrator %}
+                    <div class="admin-actions">
+                        <a href="{{ url_for('user.edit_blog', id=blog.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fa fa-edit"></i> 编辑
+                        </a>
+                        <form method="POST" action="{{ url_for('user.delete_blog', id=blog.id) }}"
+                              onsubmit="return confirm('确定要删除这篇博客吗？');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="fa fa-trash"></i> 删除
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
             </div>
         </div>
     </li>

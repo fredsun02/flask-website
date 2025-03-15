@@ -1,7 +1,23 @@
 {% extends 'base.html' %}
-
+{% from 'bootstrap/wtf.html' import quick_form %}
 {% block title %}Blog Page{% endblock %}
 
 {% block page_content %}
   {% include '_blogs.html' %}
+  <br>
+  <!-- 这个 id 是为了便于 _post.html 中定义的评论链接定位 -->
+  <h4 id="comments">Comments</h4>
+  <!-- 如果当前登录用户有评论权限，显示评论输入框 START -->
+  {% if current_user.is_authenticated and
+      current_user.has_permission(Permission.COMMENT) %}
+    <div class='comment-form'>
+      {{ quick_form(form) }}
+    </div><br><hr>
+  {% endif %}
+  <!-- 如果当前登录用户有评论权限，显示评论输入框 END -->
+  {% include '_comments.html' %}
+  <!-- 分页 -->
+  {% if pagination and pagination.pages > 1 %}
+    {{render_pagination_comments(pagination, 'front.blog', id=blogs[0].id)}}
+  {% endif %}
 {% endblock %}

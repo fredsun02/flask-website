@@ -164,6 +164,25 @@ def edit_blog(id):
         return redirect(url_for('front.blog', id=blog.id))
     return render_template('user/edit_blog.html', form=form)
 
+@user.route('/delete-blog/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def delete_blog(id):
+    '''删除博客（仅管理员）'''
+    blog = Blog.query.get_or_404(id)
+    
+    if request.method == 'POST':  # 只在 POST 请求时执行删除操作
+        try:
+            db.session.delete(blog)
+            db.session.commit()
+            flash('博客已删除', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash('删除失败', 'danger')
+    
+    return redirect(url_for('front.blogs'))
+
+
 @user.route('/follow/<name>')
 @login_required
 def follow(name):
