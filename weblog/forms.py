@@ -3,7 +3,7 @@ from typing import Any, Mapping
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, PasswordField, IntegerField, RadioField, TextAreaField, SelectField
 from wtforms import ValidationError
-from wtforms.validators import DataRequired, Length, Email, EqualTo, Regexp
+from wtforms.validators import DataRequired, Length, Email, EqualTo, Regexp, Optional
 from flask_login import current_user
 from flask_pagedown.fields import PageDownField  # 从 fields 子模块导入
 
@@ -179,6 +179,7 @@ class BlogForm(FlaskForm):
     # 这里使用 Flask-PageDown 提供的字段类，以支持 Markdown 编辑
     # 前端再设置一下预览，就可以在输入框输入 Markdown 语句并显示在页面上
     title = StringField('标题', validators=[DataRequired()])
+    tags_string = StringField('标签（用逗号分隔）', validators=[Optional()])
     body = PageDownField('博客内容', validators=[DataRequired()])
     submit = SubmitField('提交')
 

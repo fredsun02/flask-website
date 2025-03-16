@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/wtf.html' import quick_form %}
+{% from '_macros.html' import render_pagination %}
+
+{% block title %}Weblog{% endblock %}
+
+{% block page_content %}
+{% if current_user.is_authenticated %}
+<div class="card mt-4">
+{{ quick_form(form) }}
+</div>
+{% endif %}
+
+{% endblock %}

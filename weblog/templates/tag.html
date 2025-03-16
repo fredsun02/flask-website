@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from '_macros.html' import render_pagination %}
+
+{% block title %}标签: {{ tag.name }}{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>标签: {{ tag.name }}</h1>
+</div>
+
+<div class="container">    
+    <div class="blog-list">
+        {% for blog in blogs %}
+        <div class="blog-item">
+            <h3 class="blog-title">
+                <a href="{{ url_for('front.blog', id=blog.id) }}">{{ blog.title }}</a>
+            </h3>
+            <div class="blog-meta">
+                <span><i class="fa fa-calendar"></i> {{ moment(blog.time_stamp).format('YYYY-MM-DD') }}</span>
+                <span><i class="fa fa-user"></i> {{ blog.author.name }}</span>
+                <span><i class="fa font-awesome"</i> {{ blog.body|length }} 字</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 分页 -->
+    {% if pagination %}
+    <div class="pagination-container">
+        {{ render_pagination(pagination) }}
+    </div>
+    {% endif %}
+</div>{% endblock %}

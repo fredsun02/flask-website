@@ -6,11 +6,20 @@ from itsdangerous import TimedSerializer as Serializer  # 使用 TimedSerializer
 from itsdangerous import BadSignature
 from datetime import datetime
 from markdown import markdown
+from markdown.extensions import codehilite, fenced_code
 import enum
 import hashlib
 import bleach
+from sqlalchemy import event
+from bleach.css_sanitizer import CSSSanitizer
 
 db = SQLAlchemy()
+
+blog_tags = db.Table('blog_tags',
+    db.Column('blog_id', db.Integer, db.ForeignKey('blog.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
+
 
 
 class Gender(enum.Enum):
@@ -296,6 +305,23 @@ class Permission:
     MODERATE = 8 # 管理评论
     ADMINISTER = 128 # 管理用户
 
+class Tag(db.Model):
+    '''标签类'''
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+
+    def __repr__(self):
+        return '<Tag: {}>'.format(self.name)  # 返回标签的名称
+    
+    @classmethod
+    def remove_unused(cls):
+        '''删除未使用的标签'''
+        unused = cls.query.filter(~cls.blogs.any()).all()
+        for tag in unused:
+            db.session.delete(tag)
+        db.session.commit()
+
+
 class Blog(db.Model):
     '''博客映射类'''
 
@@ -317,11 +343,31 @@ class Blog(db.Model):
     # cascade='all, delete-orphan' 设置级联行为：
     #   - all: 所有操作都级联（包括 save-update, merge, refresh-expire, expunge, delete）
     #   - delete-orphan: 当记录与父对象解除关联时，自动删除这条记录
-    author = db.relationship('User', 
-                           backref=db.backref('blogs', 
-                                            lazy='dynamic',
-                                            cascade='all, delete-orphan'))    
     
+    tags = db.relationship('Tag', secondary=blog_tags, backref=db.backref('blogs',lazy='dynamic')) # 建立与 Tag 模型的关系  
+
+    @property  #这个装饰器使得 tags_string 可以像普通属性一样被读取
+    def tags_string(self):
+        '''将 tags 列表转换为字符串'''
+        return ', '.join([tag.name for tag in self.tags])
+    
+    @tags_string.setter  # 当 tags_string 被赋值时，自动调用此方法
+    def tags_string(self, value):
+        """从字符串设置标签"""
+        if value:  # 如果有输入标签
+            self.tags = []  # 清除现有标签
+            # 将字符串分割成列表：'Python, Flask' -> ['Python', 'Flask']
+            tag_names = [name.strip() for name in value.split(',')]
+            
+            # 处理每个标签名
+            for tag_name in tag_names:
+                if tag_name:  # 忽略空标签
+                    # 查找或创建标签
+                    tag = Tag.query.filter_by(name=tag_name).first()
+                    if tag is None:
+                        tag = Tag(name=tag_name)
+                    # 添加到博客的标签列表
+                    self.tags.append(tag)
 
     # 该方法为静态方法，可以写在类外部，Blog().body 有变化时自动运行
     # target 为 Blog 类的实例，value 为实例的 body 属性值
@@ -340,31 +386,50 @@ class Blog(db.Model):
         # 定义允许的 HTML 标签列表
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                       'h1', 'h2', 'h3', 'p']
+                       'h1', 'h2', 'h3', 'p', 'img', 'div', 'span',
+                       'table', 'tr', 'td', 'th', 'tbody', 'thead']
         
-        # 处理流程：Markdown → HTML → 清洗 HTML → 处理链接 → 存储
-        target.body_html = bleach.linkify(  # 步骤3：将纯文本 URL 转换为可点击的链接
-            bleach.clean(  # 步骤2：清洗 HTML，删除不安全的标签
-                markdown(value, output_format='html'),  # 步骤1：将 Markdown 转换为 HTML
-                tags=allowed_tags,  # 只保留允许的 HTML 标签
-                strip=True  # 删除不在允许列表中的标签
-            )
+        # 创建 CSS 清理器，定义允许的 CSS 属性
+        css_sanitizer = CSSSanitizer(
+            allowed_css_properties=['color', 'text-align']
         )
 
-        # 示例转换过程：
-        # 1. 用户输入(Markdown)：
-        #    **Hello** https://example.com
-        # 2. 转换为HTML：
-        #    <strong>Hello</strong> https://example.com
-        # 3. 清洗HTML（保留安全标签）：
-        #    <strong>Hello</strong> https://example.com
-        # 4. 处理链接：
-        #    <strong>Hello</strong> <a href="https://example.com">https://example.com</a>
+        # 处理流程：Markdown → HTML → 清洗 HTML → 处理链接 → 存储
+        html = markdown(value, 
+                       extensions=['fenced_code',  # 支持 ``` 代码块语法
+                                 'tables',         # 支持表格
+                                 'nl2br'],         # 支持换行
+                       extension_configs={
+                           'markdown.extensions.fenced_code': {
+                               'lang_prefix': 'language-'  # 保留语言标识前缀,便于 highlight.js 识别
+                           }
+                       },
+                       output_format='html5')
+        
+        print("Markdown 转换后的 HTML:", html)  # 添加这行来查看中间结果
 
-# 设置 SQLAlchemy 事件监听器：
-# 当 Blog.body 的值发生变化时，自动调用 on_changed_body 方法
-# 这样用户不需要手动调用转换函数，系统会自动处理格式转换
-db.event.listen(Blog.body, 'set', Blog.on_changed_body)
+        allowed_tags.extend(['pre', 'code', 'span', 'div'])
+
+
+        cleaned = bleach.clean(
+            html,
+            tags=allowed_tags + ['pre', 'code', 'span'],
+            attributes={
+                '*': ['class', 'id', 'style', 'data-lang'],
+                'a': ['href', 'rel', 'target'],
+                'img': ['src', 'alt'],
+                'pre': ['class', 'data-lang'],  # 添加 data-lang 属性支持
+                'code': ['class', 'data-lang', 'language-*','javascript', 'python', 'html', 'css'],
+                'div': ['style', 'class']
+            },
+            css_sanitizer=css_sanitizer  # 使用 CSS 清理器
+        )
+        
+        # 处理链接并存储
+        target.body_html = bleach.linkify(cleaned)
+
+# 设置 SQLAlchemy 事件监听器
+event.listen(Blog.body, 'set', Blog.on_changed_body)
 
 class Comment(db.Model):
     '''评论类'''

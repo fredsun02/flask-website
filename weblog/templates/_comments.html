@@ -1,7 +1,7 @@
 <ul class="comments">
     {% for comment in comments %}
     <li class="comments" style="list-style-type:none;">
-      <div class="row">
+      <div class="row comment-item">
         <!-- 评论者的头像 START -->
         <div class="col-md-1 comment-avatar">
           <a href="{{ url_for('user.index', name=comment.author.name) }}">
@@ -18,40 +18,42 @@
             <a href="{{ url_for('user.index', name=comment.author.name) }}">
               {{ comment.author.name }}</a
             >
+            {% if comment.author == author %}
+            <span class="author-tag op">OP</span>
+            {% endif %}
             &nbsp
             <!-- 如果当前用户有管理评论的权限 START -->
-            {% if moderate or current_user.is_moderator %} {% if comment.disable
-            %}
-            <a
-              class="btn btn-default btn-xs"
-              href="{{ url_for('front.enable_comment', id=comment.id) }}"
-              >Enable</a
-            >
-            {% else %}
-            <a
-              class="btn btn-default btn-xs"
-              href="{{ url_for('front.disable_comment', id=comment.id) }}"
-              >Disable</a
-            >
-            {% endif %} {% endif %}
-            <!-- 如果当前用户有管理评论的权限 START -->
+            {% if moderate or current_user.is_moderator %} 
+              {% if comment.disable %}
+                <a class="btn btn-default btn-xs"
+                   href="{{ url_for('front.enable_comment', id=comment.id) }}">
+                  Enable
+                </a>
+              {% else %}
+                <a class="btn btn-default btn-xs"
+                   href="{{ url_for('front.disable_comment', id=comment.id) }}">
+                  Disable
+                </a>
+              {% endif %} 
+            {% endif %}
+            <!-- 如果当前用户有管理评论的权限 END -->
           </div>
           <div class="comment-date">
             {{ moment(comment.time_stamp).fromNow() }}
           </div>
+          <!-- 评论内容 START -->
+          <div class="comment-body">
+            <!-- 如果评论被禁掉 -->
+            {% if comment.disable %}
+            <p><i>该评论已被管理员隐藏。</i></p>
+            {% endif %}
+            <!-- 如果评论没有被禁掉或当前登录用户有管理评论权限 -->
+            {% if moderate or not comment.disable %} {{ comment.body }} {% endif %}
+          </div>
+          <!-- 评论内容 END -->
         </div>
         <!-- 评论者和评论发表时间 END -->
       </div>
-      <!-- 评论内容 START -->
-      <div class="comment-body">
-        <!-- 如果评论被禁掉 -->
-        {% if comment.disable %}
-        <p><i>该评论已被管理员隐藏。</i></p>
-        {% endif %}
-        <!-- 如果评论没有被禁掉或当前登录用户有管理评论权限 -->
-        {% if moderate or not comment.disable %} {{ comment.body }} {% endif %}
-      </div>
-      <!-- 评论内容 END -->
     </li>
     {% endfor %}
 </ul>

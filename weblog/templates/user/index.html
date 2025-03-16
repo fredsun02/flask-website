@@ -7,7 +7,7 @@
     <div class="row">
         <!-- 左侧：用户头像 -->
         <div class="col-md-3">
-            <img class="img-rounded profile-thumbnail"
+            <img class="profile-avatar-img"
                  src="{% if user.avatar_hash %}
                         {{ user.avatar_hash }}
                       {% else %}
@@ -74,7 +74,7 @@
                     </a>
                 </small>
 
-                <!-- 如果有用户已登录，已登录用户不是 user 且有“关注“权限 START -->
+                <!-- 如果有用户已登录，已登录用户不是 user 且有"关注"权限 START -->
                 {% if current_user.is_authenticated %}
                 {% if current_user != user and current_user.has_permission(Permission.FOLLOW) %}
                     &nbsp | &nbsp
@@ -120,7 +120,7 @@
                         </small>
                     {% endif %}
                     {% endif %}
-                    <!-- 如果有用户已登录，已登录用户不是 user 且有“关注“权限 END -->
+                    <!-- 如果有用户已登录，已登录用户不是 user 且有"关注"权限 END -->
                 {% endif %}
                 </h4>
             <!-- 关注人数/粉丝数量 关注/取关 END -->

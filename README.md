@@ -86,7 +86,7 @@ flask-website/
     ├── static/           # Static files (CSS, JS, etc.)
     ├── app.py            # Application factory
     ├── configs.py        # Configuration settings
-    ├── decorators.py     # Custom decorators
+    ├── decorators.py     # Custom decorators 
     ├── email.py          # Email functionality
     ├── forms.py          # Form definitions
     └── models.py         # Database models

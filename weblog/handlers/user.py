@@ -8,7 +8,7 @@ from flask import request, current_app
 from flask_login import login_required, current_user, login_user
 import flask_bootstrap
 
-from ..models import User, db, Role, Blog, Permission
+from ..models import User, db, Role, Blog, Permission, Tag
 from ..forms import ProfileForm, AdminProfileForm, ChangePasswordForm, BeforeResetPasswordForm, ResetPasswordForm, ChangeEmailForm, BlogForm
 from ..decorators import admin_required
 from ..email import send_email
@@ -174,6 +174,7 @@ def delete_blog(id):
     if request.method == 'POST':  # 只在 POST 请求时执行删除操作
         try:
             db.session.delete(blog)
+            Tag.remove_unused()
             db.session.commit()
             flash('博客已删除', 'success')
         except Exception as e:
@@ -264,3 +265,21 @@ def followers(name):
     return render_template('user/follow.html', user=user, title="我的粉丝",
                            endpoint='user.followers', pagination=pagination,
                            follows=follows)
+
+@user.route('/<name>/write_blog', methods=['GET', 'POST'])
+@login_required
+def write_blog(name):
+    '''发表博客'''
+    form = BlogForm()
+    if form.validate_on_submit():
+        blog = Blog()
+        form.populate_obj(blog)
+       
+        blog.author = current_user
+        db.session.add(blog)
+        db.session.commit()
+
+        flash('发表成功', 'success')
+        return redirect(url_for('.index', name=current_user.name))
+    return render_template('user/write_blog.html', form=form)
+

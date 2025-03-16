@@ -1,5 +1,5 @@
 <!-- 每日一句卡片 -->
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <strong>每日一句</strong>
     </div>
@@ -8,20 +8,21 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <strong>每日一句</strong>
-    </div>
-    <div class="card-body">
-        <p>今天是{{ moment().format('YYYY年MM月DD日') }}，{{ moment().format('dddd') }}</p>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header">
-        <strong>每日一句</strong>
-    </div>
-    <div class="card-body">
-        <p>今天是{{ moment().format('YYYY年MM月DD日') }}，{{ moment().format('dddd') }}</p>
-    </div>
+<!-- 标签卡片 -->
+<div class="card mb-3">
+    <div class="card-header p-2">
+        <strong><i class="fa fa-tags"></i> 所有标签</strong>
+    </div>    
+    <ul class="list-group list-group-flush">
+        {% for tag in tags %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+            <a class="text-info-a" href="{{ url_for('.tag', name=tag.name) }}" 
+                title="查看{{ tag.name }}下所有文章">
+                {{ tag.name }}
+            </a>
+            <span class="badge badge-success rounded-pill" 
+                title="当前分类下有{{ tag.blogs.count() }}篇文章">{{ tag.blogs.count() }}</span>
+        </li>
+        {% endfor %}
+    </ul>
 </div>

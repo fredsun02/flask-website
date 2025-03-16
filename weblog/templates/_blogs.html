@@ -21,6 +21,18 @@
                     {{ blog.author.name }}
                 </span>
                 
+                <span class="tags">
+                    {% if blog.tags %}
+                        <i class="fa fa-tags"></i>
+                        {% for tag in blog.tags %}
+                            <a href="{{ url_for('front.tag', name=tag.name) }}" class="badge bg-secondary">
+                                {{ tag.name }}
+                            </a>
+                            {% if not loop.last %} {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </span>
+                
                 <span>
                     <i class="fa fa-file-text"></i>
                     {{ blog.body|length }} 字
@@ -46,11 +58,14 @@
                 {% endif %}
 
                 <!-- 作者编辑按钮 -->
-                {% if current_user == blog.author %}
+                {% if current_user == blog.author and not current_user.is_administrator %}
+                    <div class="user-actions">
                     <a href="{{ url_for('user.edit_blog', id=blog.id) }}"
-                       {% if not noblank %}target="_blank"{% endif %}>
-                        <span class="label label-success">Edit</span>
+                       {% if not noblank %}target="_blank"{% endif %}
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="fa fa-edit"></i> 编辑
                     </a>
+                    </div>
                 {% endif %}
                 <!-- 管理员编辑/删除按钮 -->
                 {% if current_user.is_administrator %}

@@ -8,6 +8,15 @@
 body {
     margin: 0;
     padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 
+                "Segoe UI", "PingFang SC", "Hiragino Sans GB", 
+                "Microsoft YaHei", "Helvetica Neue", Arial, 
+                sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    -webkit-font-smoothing: antialiased;  /* 字体平滑 */
+    -moz-osx-font-smoothing: grayscale;   /* Firefox字体平滑 */
 }
 
 main {
@@ -215,13 +224,38 @@ h3 {
 }
 
 /* 导航栏样式 */
-.navbar {
-    background-color: #24292e;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding: 0.3rem 1rem;
-    min-height: 50px;
+.navbar-inverse {
+    background-color: #2c3e50;
+    height: 50px;
+    border: none;
+}
+
+/* 导航链接样式 */
+.navbar-inverse .navbar-nav > li > a {
+    color: #bdc3c7 !important;
+    line-height: 20px;
+    padding: 15px;
+}
+
+/* 下拉菜单样式 */
+.navbar-inverse .dropdown-menu {
+    min-width: 120px;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-inverse .dropdown-menu > li > a {
+    padding: 8px 15px;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.navbar-inverse .dropdown-menu > li > a:hover {
+    background-color: #f8f9fa;
+    color: #16181b;
 }
 
 .navbar-brand {
@@ -596,6 +630,20 @@ h3 {
     display: inline-block;
 }
 
+
+.user-actions {
+    margin-top: 10px;
+    padding: 8px 0;
+    display: flex;
+    gap: 8px;         /* 按钮之间的间距 */
+    align-items: center;
+}
+
+.user-actions .btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
 .admin-actions {
     margin-top: 10px;
     padding: 8px 0;
@@ -629,4 +677,422 @@ h3 {
 /* 博客标题居中 */
 .post-header {
     text-align: left;
+}
+
+/* 下拉菜单样式 */
+.dropdown-menu {
+    min-width: 120px;          /* 设置合适的宽度 */
+    padding: 0.5rem 0;         /* 上下留点空间 */
+    margin-top: 0;             /* 紧贴导航栏 */
+    background-color: #fff;    /* 白色背景 */
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+/* 下拉菜单项样式 */
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    color: #333;              /* 深色文字 */
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* 下拉菜单项悬停效果 */
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #16181b;
+}
+
+/* 用户头像样式 */
+.profile-thumbnail {
+    width: 150px;          /* 固定宽度 */
+    height: 150px;         /* 固定高度 */
+    border-radius: 8px;    /* 圆角 */
+    object-fit: cover;     /* 保持图片比例并填充容器 */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* 添加轻微阴影 */
+    margin-bottom: 20px;   /* 底部间距 */
+}
+
+/* 小尺寸头像（用于评论等地方） */
+.comment-avatar .profile-thumbnail {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-bottom: 0;
+}
+
+/* 评论区容器 */
+.comments {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 4px;
+}
+
+/* 评论区标题 */
+h3.comments-title {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+/* 评论列表容器 */
+ul.comments {
+    padding: 0;
+    margin-top: 0;         /* 移除顶部边距 */
+    list-style: none;
+}
+
+/* 评论项样式 */
+.comment-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 5px 0;         /* 减小上下内边距 */
+    margin: 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* 评论者头像容器 */
+.comment-avatar {
+    flex: 0 0 40px;        /* 减小头像容器宽度 */
+    padding-right: 10px;    /* 减小右侧内边距 */
+}
+
+/* 评论内容区域 */
+.comment-content {
+    flex: 1;
+    padding-left: 0;
+}
+
+/* 评论作者和时间 */
+.comment-author, .comment-date {
+    display: inline-block;
+    margin: 0;             /* 移除默认边距 */
+    line-height: 1.4;      /* 减小行高 */
+}
+
+/* 评论正文 */
+.comment-body {
+    margin-top: 3px;       /* 减小与上方内容的间距 */
+    line-height: 1.4;      /* 减小行高 */
+}
+
+/* 移除最后一个评论的边框 */
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+/* 博客表单文本框样式 */
+.blog-form textarea,
+#flask-pagedown-body {    /* Markdown编辑器的ID */
+    min-height: 400px;    /* 固定最小高度 */
+    max-height: 400px;    /* 固定最大高度 */
+    resize: none;         /* 禁止手动调整大小 */
+    width: 100%;         /* 宽度占满容器 */
+    padding: 10px;       /* 内边距 */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 标题和标签输入框样式 */
+.blog-form input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 作者标识样式 */
+.author-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    color: #0366d6;
+    background-color: #f1f8ff;
+    border: 1px solid #c8e1ff;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+
+/* 特殊标识：OP */
+.author-tag.op {
+    color: #22863a;
+    background-color: #f0fff4;
+    border-color: #bef5cb;
+}
+
+/* 关于页面样式 */
+.about-content {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.about-article {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #2c3e50;
+    letter-spacing: 0.5px;
+}
+
+.about-article p {
+    margin-bottom: 1.2em;
+    text-align: justify;
+}
+
+/* 关于页面标题样式 */
+.about-title {
+    font-size: 28px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+/* 代码块样式 */
+.codehilite {
+    background: #f8f9fa;
+    padding: 1em;
+    margin: 1em 0;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    overflow-x: auto;
+}
+
+.codehilite pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+/* 语法高亮颜色 */
+.codehilite .hll { background-color: #ffffcc }
+.codehilite .c { color: #999988; font-style: italic } /* 注释 */
+.codehilite .err { color: #a61717; background-color: #e3d2d2 } /* 错误 */
+.codehilite .k { color: #000000; font-weight: bold } /* 关键字 */
+.codehilite .o { color: #000000; font-weight: bold } /* 运算符 */
+.codehilite .cm { color: #999988; font-style: italic } /* 多行注释 */
+.codehilite .cp { color: #999999; font-weight: bold; font-style: italic } /* 预处理器 */
+.codehilite .c1 { color: #999988; font-style: italic } /* 单行注释 */
+.codehilite .cs { color: #999999; font-weight: bold; font-style: italic } /* 特殊注释 */
+.codehilite .gd { color: #000000; background-color: #ffdddd } /* 删除的代码 */
+.codehilite .ge { color: #000000; font-style: italic } /* 强调 */
+.codehilite .gr { color: #aa0000 } /* 错误 */
+.codehilite .gh { color: #999999 } /* 头部 */
+.codehilite .gi { color: #000000; background-color: #ddffdd } /* 插入的代码 */
+.codehilite .go { color: #888888 } /* 输出 */
+.codehilite .gp { color: #555555 } /* 提示符 */
+.codehilite .gs { font-weight: bold } /* 强调 */
+.codehilite .gu { color: #aaaaaa } /* 通用 */
+.codehilite .gt { color: #aa0000 } /* 跟踪 */
+.codehilite .kc { color: #000000; font-weight: bold } /* 常量关键字 */
+.codehilite .kd { color: #000000; font-weight: bold } /* 声明关键字 */
+.codehilite .kn { color: #000000; font-weight: bold } /* 命名空间关键字 */
+.codehilite .kp { color: #000000; font-weight: bold } /* 伪关键字 */
+.codehilite .kr { color: #000000; font-weight: bold } /* 保留关键字 */
+.codehilite .kt { color: #445588; font-weight: bold } /* 类型关键字 */
+.codehilite .m { color: #009999 } /* 数字 */
+.codehilite .s { color: #d01040 } /* 字符串 */
+.codehilite .na { color: #008080 } /* 命名属性 */
+.codehilite .nb { color: #0086B3 } /* 内置名称 */
+.codehilite .nc { color: #445588; font-weight: bold } /* 类名称 */
+.codehilite .no { color: #008080 } /* 常量名称 */
+.codehilite .nd { color: #3c5d5d; font-weight: bold } /* 装饰器名称 */
+.codehilite .ni { color: #800080 } /* 实体名称 */
+.codehilite .ne { color: #990000; font-weight: bold } /* 异常名称 */
+.codehilite .nf { color: #990000; font-weight: bold } /* 函数名称 */
+.codehilite .nl { color: #990000; font-weight: bold } /* 标签名称 */
+.codehilite .nn { color: #555555 } /* 命名空间 */
+.codehilite .nt { color: #000080 } /* HTML/XML 标签 */
+.codehilite .nv { color: #008080 } /* 变量名称 */
+.codehilite .ow { color: #000000; font-weight: bold } /* 字词运算符 */
+.codehilite .w { color: #bbbbbb } /* 文本空白 */
+.codehilite .mf { color: #009999 } /* 浮点数 */
+.codehilite .mh { color: #009999 } /* 十六进制数 */
+.codehilite .mi { color: #009999 } /* 整数 */
+.codehilite .mo { color: #009999 } /* 八进制数 */
+.codehilite .sb { color: #d01040 } /* 字符串 b'' */
+.codehilite .sc { color: #d01040 } /* 字符串 c'' */
+.codehilite .sd { color: #d01040 } /* 字符串 doc */
+.codehilite .s2 { color: #d01040 } /* 字符串 "双引号" */
+.codehilite .se { color: #d01040 } /* 字符串 转义 */
+.codehilite .sh { color: #d01040 } /* 字符串 heredoc */
+.codehilite .si { color: #d01040 } /* 字符串 插值 */
+.codehilite .sx { color: #d01040 } /* 字符串 其他 */
+.codehilite .sr { color: #009926 } /* 字符串 正则 */
+.codehilite .s1 { color: #d01040 } /* 字符串 '单引号' */
+.codehilite .ss { color: #990073 } /* 字符串 符号 */
+.codehilite .bp { color: #999999 } /* 内置名称 伪 */
+.codehilite .vc { color: #008080 } /* 变量名称 类 */
+.codehilite .vg { color: #008080 } /* 变量名称 全局 */
+.codehilite .vi { color: #008080 } /* 变量名称 实例 */
+.codehilite .il { color: #009999 } /* 文字 长整型 */
+
+/* 标签云容器 */
+.tags-cloud {
+    padding: 20px 0;
+    margin: 0;
+}
+
+/* 标签列容器 */
+.tags-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 标签卡片样式 */
+.tag-card {
+    display: block;  /* 让链接变成块级元素 */
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    text-decoration: none;  /* 移除链接下划线 */
+    color: inherit;  /* 继承原来的文字颜色 */
+}
+
+/* 标签卡片头部 */
+.tag-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+/* 标签标题 */
+.tag-title {
+    font-size: 18px;
+    color: #333;
+    margin: 0;
+}
+
+/* 文章数量 */
+.tag-count {
+    background: #f8f9fa;
+    padding: 4px 12px;
+    border-radius: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+/* 标签描述 */
+.tag-description {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 悬停效果 */
+.tag-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-decoration: none;  /* 确保悬停时也不显示下划线 */
+}
+
+/* 页面标题样式 */
+.page-title {
+    font-size: 24px;
+    color: #333;
+    margin: 30px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+/* 侧边栏标签样式 */
+.sidebar-tags {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-tag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;  /* 左对齐，移除左内边距 */
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #eee;
+    transition: all 0.2s ease;
+}
+
+.sidebar-tag:hover {
+    background: #e9ecef;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.tag-name {
+    font-size: 14px;
+}
+
+.tag-count {
+    font-size: 12px;
+    color: #6c757d;
+    background: #fff;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* 添加卡片底部间距 */
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+/* 分类链接样式 */
+.text-info-a {
+    color: #333;
+    text-decoration: none;
+}
+
+.text-info-a:hover {
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* 调整卡片和列表样式 */
+.card {
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,.125);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    padding: 0.75rem 1rem;  /* 统一内边距 */
+}
+
+.card-header i {
+    margin-right: 8px;
+}
+
+/* 调整列表项样式 */
+.list-group-item {
+    padding: 0.5rem 1rem;  /* 减小上下内边距 */
+    border-width: 1px 0;   /* 只保留上下边框 */
+}
+
+.list-group-item:last-child {
+    border-bottom: 0;
+}
+
+/* 调整徽章样式 */
+.badge-success {
+    background-color: #87c38f;
+    font-weight: normal;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
 }

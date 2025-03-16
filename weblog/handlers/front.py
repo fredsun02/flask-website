@@ -5,7 +5,7 @@ from datetime import datetime
 import hashlib
 
 from ..forms import RegisterForm, LoginForm, BlogForm, CommentForm
-from ..models import db, User, Blog, Comment, Permission
+from ..models import db, User, Blog, Comment, Permission, Tag
 from ..email import send_email
 from ..decorators import moderate_required
 
@@ -38,6 +38,9 @@ def gravatar_filter(email):
     """
     return hashlib.md5(email.encode()).hexdigest()
 
+
+
+
 @front.route('/', methods=['GET', 'POST'])
 def index():
     '''主页'''
@@ -66,12 +69,15 @@ def index():
     # 获取当前页的博客列表
     blogs = pagination.items
 
+    # 获取所有标签
+    tags = Tag.query.order_by(Tag.name).all()
     # 将分页对象和博客列表传递给模板
     return render_template('index.html', 
                          form=form,  # 发博客的表单
                          blogs=blogs,  # 当前页的博客列表
                          pagination=pagination, # 分页对象，用于生成分页导航
-                         date_time=date_time)
+                         date_time=date_time, 
+                         tags=tags)
 
 @front.route('/blog/<int:id>', methods=['GET', 'POST'])
 def blog(id):
@@ -97,7 +103,7 @@ def blog(id):
         error_out=False
     )
     comments = pagination.items
-    return render_template('blog.html', blogs=[blog], hidebloglink = True, noblank = True, form=form, comments=comments, pagination=pagination, Permission=Permission)
+    return render_template('blog.html', blogs=[blog], hidebloglink = True, noblank = True, form=form, comments=comments, pagination=pagination, Permission=Permission, author=blog.author)
 
 
 @front.app_errorhandler(404)
@@ -243,3 +249,28 @@ def blogs():
                          blogs=blogs, 
                          pagination=pagination)
 
+@front.route('/tag/<name>')
+def tag(name):
+    '''显示特定标签的博客'''
+    tag = Tag.query.filter_by(name=name).first()
+    blogs = tag.blogs.order_by(Blog.time_stamp.desc()).paginate(
+        page=request.args.get('page', 1, type=int),
+        per_page=10,
+        error_out=False
+    )
+    return render_template('tag.html', tag=tag, blogs=blogs, pagination=blogs)
+
+@front.route('/tags')
+def tags():
+    '''显示所有标签'''
+    tags = Tag.query.order_by(Tag.name).paginate(
+        page=request.args.get('page', 1, type=int),
+        per_page=10,
+        error_out=False
+    )
+    return render_template('tags.html', tags=tags, pagination=tags)
+
+@front.route('/about')
+def about():
+    '''关于'''
+    return render_template('about.html')

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}所有标签{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <h1 class="page-title">所有标签</h1>
+    
+    <div class="tags-cloud">
+        <div class="tags-column">
+            {% for tag in tags %}
+            <a href="{{ url_for('.tag', name=tag.name) }}" class="tag-card">
+                <div class="tag-header">
+                    <h2 class="tag-title">{{ tag.name }}</h2>
+                    <span class="tag-count">{{ tag.blogs.count() }} 篇</span>
+                </div>
+                <p class="tag-description">
+                    这类博客主要是记录一些关于{{ tag.name }}方面。
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

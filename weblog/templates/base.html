@@ -45,8 +45,24 @@
           <li><a href="/">Home</a></li>
         </ul>
         <ul class="nav navbar-nav">
+          <li><a href="/tags">Tags</a></li>
+        </ul>
+        <ul class="nav navbar-nav">
           <li><a href="/blogs">Blogs</a></li>
         </ul>
+        {% if current_user.is_authenticated %}
+        <ul class="nav navbar-nav">
+          <li><a href="{{ url_for('user.write_blog', name=current_user.name) }}">Write Blog</a></li>
+        </ul>
+        {% else %}
+        <ul class="nav navbar-nav">
+          <li><a href="{{ url_for('front.login') }}">Write Blog</a></li>
+        </ul>
+        {% endif %}
+        <ul class="nav navbar-nav">
+          <li><a href="/about">About</a></li>
+        </ul>
+
         <!-- 导航栏左侧按钮 END -->
 
         <!-- 导航栏右侧下拉菜单 START -->
@@ -137,4 +153,22 @@
   {{ super() }}
   {{ moment.include_moment() }}  <!-- 引入 moment.js -->
   {{ moment.lang('zh-cn') }}  <!-- 设置 moment.js 语言为中文 -->
+  <!-- Markdown 预览支持 -->
+  {{ pagedown.include_pagedown() }}
+  
+  <!-- 代码高亮支持 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+          document.querySelectorAll('pre code').forEach((block) => {
+              hljs.highlightBlock(block);
+          });
+      });
+  </script>
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+
 {% endblock %}
