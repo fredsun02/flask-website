@@ -437,8 +437,8 @@ class Comment(db.Model):
     body = db.Column(db.Text)
     time_stamp = db.Column(db.DateTime, index=True, default=datetime.now)
     disable = db.Column(db.Boolean)
-    author_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE')) # 当父表（User）中的记录被删除时，级联删除子表（Comment）中的记录
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True) # 当父表（User）中的记录被删除时，级联删除子表（Comment）中的记录
     author = db.relationship('User', backref=db.backref('comments', lazy='dynamic', cascade='all, delete-orphan')) # 建立与 User 模型的关系，User 为父表，Comment 为子表，设置为延迟加载，级联为删除，且当评论与用户解除关系时，自动删除评论
+    author_name = db.Column(db.String(64), nullable=True) # 游客的昵称
     blog_id = db.Column(db.Integer, db.ForeignKey('blog.id', ondelete='CASCADE')) # 当父表（Blog）中的记录被删除时，级联删除子表（Comment）中的记录
     blog = db.relationship('Blog', backref=db.backref('comments', lazy='dynamic', cascade='all, delete-orphan')) # 建立与 Blog 模型的关系，Blog 为父表，Comment 为子表，设置为延迟加载，级联为删除，且当评论与博客解除关系时，自动删除评论
-

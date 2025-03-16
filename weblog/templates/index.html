@@ -23,13 +23,13 @@
                 <!-- 个人资料卡片 -->
                 <div class="profile-card">
                     <div class="card-header">
-                        <strong>F</strong>的个人资料
+                        <strong>F </strong>的个人资料
                     </div>
                     <div class="card-body">
                         <div class="profile-content">
                             <!-- 左侧头像 -->
                             <div class="profile-avatar">
-                                <img class="img-fluid" 
+                                <img class="img" 
                                      alt="OwnerAvatar" 
                                      src="https://www.gravatar.com/avatar/{{ 'sunshen02@gmail.com' | gravatar }}?s=200">
                             </div>
@@ -37,16 +37,7 @@
                             <div class="profile-info">
                                 <h2>一个基于Flask的博客和论坛系统</h2>
                                 <div class="info-item">
-                                    <span>Github:</span>
-                                    <i class="fa fa-link"></i>
-                                    <a href="https://github.com/fredsun02" target="_blank">
-                                        https://github.com/fredsun02
-                                    </a>
-                                </div>
-                                <div class="info-item">
-                                    <span>建站时间:</span>
-                                    <i class="fa fa-clock-o"></i>
-                                    2025-03-15
+                                    <span>UCL UG Mathematics 2025'</span>
                                 </div>
                                 <div class="info-item">
                                     <span>联系邮箱:</span>
@@ -62,9 +53,8 @@
             </div>
 
             <!-- 右侧边栏 -->
-            <div class="col-md-4">
-                <!-- slider -->
-                 {% include 'slider.html' %}
+            <div class="col-md-4 sidebar">
+                {% include 'slider.html' %}
             </div>
         </div>
     </div>

@@ -4,24 +4,42 @@
       <div class="row comment-item">
         <!-- 评论者的头像 START -->
         <div class="col-md-1 comment-avatar">
+          {% if comment.author %}
+          <!-- 如果评论者是用户 -->
           <a href="{{ url_for('user.index', name=comment.author.name) }}">
             <img
               class="img-rounded profile-thumbnail"
               src="{{ comment.author.gravatar(size=40) }}"
             />
           </a>
+          {% else %}
+          <!-- 如果评论者是游客 -->
+          <img
+            class="img-rounded profile-thumbnail"
+            src="https://www.gravatar.com/avatar/?d=mp&s=40"
+          />
+          {% endif %}
         </div>
         <!-- 评论者的头像 END -->
+
         <!-- 评论者和评论发表时间 START -->
         <div class="col-md-11 comment-content">
           <div class="comment-author">
+            <!-- 如果评论者是用户 -->
+            {% if comment.author %}
             <a href="{{ url_for('user.index', name=comment.author.name) }}">
               {{ comment.author.name }}</a
             >
+            {% else %}
+            <!-- 如果评论者是游客 -->
+            <span class="guest-name">{{ comment.author_name }} <span class="guest-tag">游客</span> </span>
+            {% endif %}
+
+            <!-- 如果评论者是 OP -->
             {% if comment.author == author %}
             <span class="author-tag op">OP</span>
             {% endif %}
-            &nbsp
+
             <!-- 如果当前用户有管理评论的权限 START -->
             {% if moderate or current_user.is_moderator %} 
               {% if comment.disable %}
@@ -37,6 +55,15 @@
               {% endif %} 
             {% endif %}
             <!-- 如果当前用户有管理评论的权限 END -->
+            
+            <!-- 如果当前用户有删除评论的权限 START -->
+            {% if current_user.is_moderator %}
+                <a class="btn btn-default btn-xs"
+                   href="{{ url_for('front.delete_comment', id=comment.id) }}">
+                  Delete
+                </a>
+            {% endif %}
+            <!-- 如果当前用户有删除评论的权限 END -->
           </div>
           <div class="comment-date">
             {{ moment(comment.time_stamp).fromNow() }}

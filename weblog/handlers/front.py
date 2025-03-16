@@ -89,12 +89,21 @@ def blog(id):
     form = CommentForm()
     if form.validate_on_submit():
         comment = Comment(body=form.body.data,
-                          blog=blog,
-                          author=current_user._get_current_object())
+                          blog=blog)
+        # 允许游客评论
+        if current_user.is_authenticated:
+            comment.author = current_user._get_current_object()
+        else:
+            if not form.guest_name.data:
+                flash('请输入昵称', 'warning')
+                return redirect(url_for('.blog', id=blog.id))
+            comment.author_name = form.guest_name.data
+
         db.session.add(comment)
         db.session.commit()
         flash('评论发表成功', 'success')
         return redirect(url_for('.blog', id=blog.id))
+    
     page = request.args.get('page', 1, type=int)
     pagination = blog.comments.order_by(Comment.time_stamp.desc()).paginate(
         page=page,
@@ -233,6 +242,15 @@ def enable_comment(id):
     # 重定向回原来的页面（比如博客详情页）
     return redirect(request.headers.get('Referer') or url_for('.index'))
     
+@front.route('/comment/delete/<int:id>')
+@moderate_required
+def delete_comment(id):
+    '''删除评论'''
+    comment = Comment.query.get_or_404(id)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('评论已删除', 'success')
+    return redirect(request.headers.get('Referer') or url_for('.index'))
 
 @front.route('/blogs')
 def blogs():

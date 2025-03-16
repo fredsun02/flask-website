@@ -8,21 +8,51 @@
     <h1>标签: {{ tag.name }}</h1>
 </div>
 
-<div class="container">    
+<div class="container blog-list-page">    
+
     <div class="blog-list">
         {% for blog in blogs %}
-        <div class="blog-item">
-            <h3 class="blog-title">
-                <a href="{{ url_for('front.blog', id=blog.id) }}">{{ blog.title }}</a>
-            </h3>
-            <div class="blog-meta">
-                <span><i class="fa fa-calendar"></i> {{ moment(blog.time_stamp).format('YYYY-MM-DD') }}</span>
-                <span><i class="fa fa-user"></i> {{ blog.author.name }}</span>
-                <span><i class="fa font-awesome"</i> {{ blog.body|length }} 字</span>
+        <article class="blog-item">
+            <!-- 左侧日期区 -->
+            <div class="blog-date">
+                <div class="date-box">
+                    <span class="day">{{ moment(blog.time_stamp).format('DD') }}</span>
+                    <span class="month">{{ moment(blog.time_stamp).format('MMM') }}</span>
+                </div>
             </div>
-        </div>
+            
+            <!-- 右侧内容区 -->
+            <div class="blog-content">
+                <h3 class="blog-title">
+                    <a href="{{ url_for('front.blog', id=blog.id) }}">{{ blog.title }}</a>
+                </h3>
+                <!-- 添加元信息 -->
+                    <div class="blog-meta">
+                        <span class="author">
+                            <i class="fa fa-user"></i> {{ blog.author.name }}
+                        </span>
+                        <span class="word-count">
+                            <i class="fa fa-file-text"></i> {{ blog.body|length }} 字
+                        </span>
+                        <!-- 添加标签显示 -->
+                        {% if blog.tags %}
+                        <span class="tags">
+                            <i class="fa fa-tags"></i>
+                            {% for tag in blog.tags %}
+                            <a href="{{ url_for('front.tag', name=tag.name) }}" class="tag">{{ tag.name }}</a>
+                            {% endfor %}
+                        </span>
+                        {% endif %}
+                    </div>
+                <!-- 添加文章摘要 -->
+                <div class="blog-excerpt">
+                    {{ blog.body[:200] + '...' if blog.body|length > 200 else blog.body }}
+                </div>
+            </div>
+        </article>
         {% endfor %}
     </div>
+</div>
 
     <!-- 分页 -->
     {% if pagination %}

@@ -186,4 +186,5 @@ class BlogForm(FlaskForm):
 class CommentForm(FlaskForm):
     '''评论表单类'''
     body = TextAreaField('评论内容', validators=[DataRequired()])
+    guest_name = StringField('昵称')
     submit = SubmitField('提交')

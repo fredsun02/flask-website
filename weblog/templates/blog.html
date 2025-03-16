@@ -3,19 +3,38 @@
 {% block title %}Blog Page{% endblock %}
 
 {% block page_content %}
-  {% include '_blogs.html' %}
-  <br>
-  <!-- 这个 id 是为了便于 _post.html 中定义的评论链接定位 -->
-  <h4 id="comments">Comments</h4>
-  <!-- 如果当前登录用户有评论权限，显示评论输入框 START -->
-  {% if current_user.is_authenticated and
-      current_user.has_permission(Permission.COMMENT) %}
-    <div class='comment-form'>
-      {{ quick_form(form) }}
-    </div><br><hr>
-  {% endif %}
-  <!-- 如果当前登录用户有评论权限，显示评论输入框 END -->
-  {% include '_comments.html' %}
+  <!-- 正文区域 -->
+  <div class="row">
+    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
+      {% include '_blogs.html' %}
+    </div>
+  </div>
+
+  <!-- 评论区容器 -->
+  <div class="row">
+    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
+      <!-- 这个 id 是为了便于 _post.html 中定义的评论链接定位 -->
+      <h4 id="comments">Comments</h4>
+      {% include '_comments.html' %}
+
+      <!-- 评论输入框 START -->
+      <form method="POST">
+        {{ form.csrf_token }}  <!-- 必须添加 CSRF token -->
+        <div class="comment-form">
+          {% if not current_user.is_authenticated %}
+            {{ form.guest_name.label }}
+              <!-- 渲染昵称输入框,添加占位符文本 -->
+            {{ form.guest_name(class="form-control", placeholder="请输入昵称") }}
+          {% endif %}
+          {{ form.body.label}}  <!-- 渲染"评论内容"标签 -->
+          {{ form.body(class='form-control') }} <!-- 渲染文本框,添加Bootstrap的form-control类 -->
+          {{ form.submit(class='btn btn-primary') }} <!-- 渲染提交按钮,使用Bootstrap的按钮样式 -->
+        </div>
+      </form>
+      <!-- 评论输入框 END -->
+    </div>
+  </div>
+
   <!-- 分页 -->
   {% if pagination and pagination.pages > 1 %}
     {{render_pagination_comments(pagination, 'front.blog', id=blogs[0].id)}}
