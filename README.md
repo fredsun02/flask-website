@@ -5,23 +5,20 @@
 ![Flask](https://img.shields.io/badge/Flask-2.0.3-blue) ![Python](https://img.shields.io/badge/Python-3.11-yellow) ![Licence](https://img.shields.io/badge/Licence-MIT-green)
 
 ## Introduction
-This project is a **Flask-based web application**. It aims to implement a fully functional website with user authentication, a blog system, and a clean UI using Flask-Bootstrap.
+This is a full-stack web application built with Flask, featuring a modular design and blueprint architecture that delivers a complete user system, blog platform, and permission management. The project utilises SQLAlchemy ORM for database operations, supports Markdown content creation, and implements efficient permission control through bitwise operations. The system integrates email verification, user following, tag management, and other features, whilst providing a responsive interface design that ensures an excellent user experience across various devices.
 
 ### Features
-- **User Authentication**: Complete functionality for user registration, login, and logout.
-- **Email Verification**: Automatic email verification upon registration using `Flask-Mail`, including token generation and email templates.
-- **Secure Password Hashing**: Passwords are securely hashed using `werkzeug.security` to protect user credentials.
-- **Database Management**: Database migrations are handled by `Flask-Migrate`, allowing for seamless schema changes.
-- **Role-Based Access Control**: Implementation of user roles and permissions, ensuring that only authorised users can access specific features.
-- **Dynamic User Profiles**: Users can manage their profiles, including attributes such as `age`, `gender`, `phone_number`, `location`, and `about_me`.
-- **User Activity Tracking**: Tracks and displays the last seen time for users, enhancing user engagement.
-- **Responsive User Interface**: A clean and responsive user interface built with `Flask-Bootstrap`, ensuring a good user experience across devices.
-- **Error Handling**: Custom error pages for 404 and 500 errors to improve user experience.
-- **Asynchronous Email Sending**: Emails are dispatched in a separate thread to prevent blocking the main application thread.
-- **Form Validation**: Utilises `Flask-WTF` for form handling and validation, ensuring user input is properly checked.
-- **Dynamic Time Formatting**: Uses `Flask-Moment` for displaying and formatting dates and times dynamically.
-- Blog system with posts and comments (coming soon...)
-- User profile and settings (coming soon...)
+- **User Authentication**: Complete functionality for user registration, login, and logout with email verification and password reset support.
+- **Permission Management**: Efficient permission control system based on bitwise operations, supporting multiple user roles (administrator, moderator, regular user, etc.).
+- **Blog Platform**: Markdown editing and preview support, automatic conversion to safe HTML with XSS attack prevention. 
+- **Content Management**: Blog publishing, editing, paginated display, and tag management functionality.
+- **User Interaction**: User following system, supporting follow/unfollow actions, status display, and following lists.
+
+### Technology Stack
+- **Backend Framework**: Flask
+- **Database**: MySQL + SQLAlchemy ORM
+- **Fronted Framework**: Bootstrap 3 + CSS + HTML5
+- **Template Engine**: Jinja2
 
 ---
 
